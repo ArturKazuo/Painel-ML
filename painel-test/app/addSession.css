@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+.addSessionMainDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.addSessionDiv {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 20px 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #5ebb50;
+    box-shadow: 15px 15px 40px -10px #b4b4b4;
+}
+
+.addSessionDiv input {
+    transition: all ease-out 0.1s;
+    box-shadow: inset 0px 0px 0px 0px #5ebb50;
+    width: 100%;
+    background-color: #eeeeee;
+}
+
+.addSessionDiv input:hover {
+    background-color: #e0e0e0;
+}
+
+.addSessionDiv input:focus-visible {
+    outline: none !important;
+    background-color: #eeeeee;
+}
+
+.addSessionDiv p {
+    font-family: 'Space Grotesk', ;
+    margin: 0px 0px 0px 0px;
+}
+
+.divTextarea {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0px 10px 10px 10px;
+}  
+
+.divTextareaInside {
+    transition: all ease-in-out 0.3s;
+    height: 2px;
+    width: 100%;
+    box-shadow: inset 0px 0px 0px 0px #5ebb50;
+}
+
+.addSessionDiv input:focus-visible ~ .divTextareaInside {
+    box-shadow: inset 100vw 0px 0px 0px #5ebb50;
+}
+
+.addSessionButton {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+}
+
+.addButton {
+    margin: 20px 0px 20px 0px;
+}
+
+.addButton p {
+    color: black;
+}
+
+.sucesso {
+    font-size: 1.6rem;
+}
+
+.multipleButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.multipleButtons button {
+    margin-bottom: 20px;
+}
+
+.chaveErro {
+    font-size: 1.6rem;
+}

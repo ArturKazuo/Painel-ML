@@ -1,0 +1,35 @@
+{
+  "name": "painel-test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@wppconnect-team/wppconnect": "^1.27.3",
+    "autoprefixer": "10.4.14",
+    "bootstrap": "^5.3.1",
+    "deepmerge": "^4.3.1",
+    "eslint": "8.46.0",
+    "eslint-config-next": "13.4.13",
+    "firebase": "^10.1.0",
+    "next": "^13.4.16-canary.1",
+    "postcss": "8.4.27",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "restify": "^11.1.0",
+    "tailwindcss": "3.3.3",
+    "webpack": "^5.88.2"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false,
+    "tls": false,
+    "net": false,
+    "child_process": false
+  }
+}
