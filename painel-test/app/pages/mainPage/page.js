@@ -17,9 +17,19 @@ import React, { useState, useEffect } from 'react'
 import { firebaseConfig } from '../../firebase.config.js'
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, doc, addDoc, setDoc, deleteDoc } from 'firebase/firestore/lite';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'
+// import Router  from 'next/router';
 import NavBar from '../components/navBar/page.js'
+import ConsoleMonaco from '../components/consoleMonaco/page.js'
 import loadingSVG from '../../imgs/oval-anim-dark.svg'
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMagnifyingGlass,
+  faCircleStop
+} from "@fortawesome/free-solid-svg-icons";
 
   
 const app = initializeApp(firebaseConfig);
@@ -108,6 +118,65 @@ export default function mainPage(params) {
     
         // document.getElementById(`botCardImg${e.target.id}`).innerHTML = `<img src="${loading.src}" width={500} height={500} alt="Picture of the author"/> `
     }
+
+    const backPage = async (e) => {
+      console.log(e)
+      document.getElementById(`botCardDiv${e.target.id}`).classList.toggle('flipped')
+      document.getElementById(`${e.target.id}`).classList.toggle('svgFlipped')
+      document.getElementById(`divSvg${e.target.id}`).classList.toggle('divSvgFlipped')
+    }
+
+    const frontPage = async (e) => {
+      
+    }
+
+    const toggleFileInput = async (e) => {
+      // document.getElementById(`${e.target.id}`).classList.toggle('receivedFile')
+      console.log('foi', e)
+      loadPage()
+      await fetch(`http://localhost:3978/getFile?file=${e.target.classList[2]}&type=${e.target.id.replace(`${e.target.classList[2]}`, '')}`).then( async (codeSS) => {  
+            let code = await codeSS.json()
+            // console.log("code: ", code)
+            // push(`/pages/components/consoleMonaco?name=${e.target.classList[2]}&type=${e.target.id.replace(`${e.target.classList[2]}`, '')}`)
+            push(`/pages/components/consoleMonaco?file=${encodeURI(code)}&name=${e.target.classList[2]}&type=${e.target.id.replace(`${e.target.classList[2]}`, '')}`)
+
+            // document.getElementById('monacoEditor').editor.setValue(code)
+        })
+      // document.getElementById(`botCardBack${e.target.id}`).innerHTML = `${ConsoleMonaco()}`
+    }
+
+    const sendFilePlease = async (formData) => {
+      await fetch(`http://localhost:3978/changeFiles`, {
+        method: "POST",
+        // headers: {'Content-Type': ' application/json'},
+        headers: {'Content-Type': 'multipart/form-data'},
+        // body: JSON.stringify(files)
+        body: formData      
+      })
+    }
+
+    const sendFile = async (e) => {
+      let indexFiles = document.getElementById(`indexFile${e.target.id.replace('addFile', '')}`).files[0]
+      let sessionFiles = document.getElementById(`sessionFile${e.target.id.replace('addFile', '')}`).files[0]
+      let botFiles = document.getElementById(`botFile${e.target.id.replace('addFile', '')}`).files[0]
+      let dialogFiles = document.getElementById(`dialogFile${e.target.id.replace('addFile', '')}`).files[0]
+    
+      console.log(indexFiles)
+
+      const files = {
+        index: indexFiles,
+        session: sessionFiles,
+        bot: botFiles,
+        dialog: dialogFiles
+      }
+
+      console.log(files)
+
+      let formData = new FormData();
+      formData.append('file', indexFiles);
+
+      sendFilePlease(formData)
+    }
     
     const loadPage = async () => {
         document.getElementById('mainID').innerHTML = document.getElementById('mainID').innerHTML + `<div class=mainLoad ><img src="${loading.src}" /></div>`
@@ -123,6 +192,7 @@ export default function mainPage(params) {
         await push('/pages/loginPage')
       } 
 
+      
       document.getElementById(`addButtonDiv`).addEventListener("click", loadPage, false);
 
       const sessions = (await getDocs(collection(db, `Sessions/${window.sessionStorage.getItem('user')}/sessions`))).docs.map(doc => doc.data())
@@ -137,18 +207,44 @@ export default function mainPage(params) {
           text += `<div class="col-2"></div>`
         }
 
+        // console.log(faMagnifyingGlass)
+
         text += `
-        <div class='botCard col-2'> 
-            <div class='botCardImg' id=botCardImg${session.sessionkey}>
-              <img src="${wpp.src}" width={500} height={500} alt="Picture of the author"/> 
+        <div class='outsideBotCard col-2'> 
+          <div class='botCardDiv'  id="botCardDivsvg${session.sessionkey}"> 
+            <div class='botCard front'>
+              <div class='botCardImg' id=botCardImg${session.sessionkey}>
+                <img src="${wpp.src}" width={500} height={500} alt="Picture of the author"/> 
+              </div>
+              <button  class=marginButtonBotCard ><p class='${sg.className}'>Nome: ${session.session}</p></button>
+              <button  class=marginButtonBotCard ><p class='${sg.className}'>Chave: ${session.sessionkey}</p></button>
+              <button id=conectarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton' id=${session.sessionkey}>Conectar</p></button>
+              <button id=desconectarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton desconectarButton' id=${session.sessionkey}>Desconectar</p></button>
+              <button id=deletarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton deleteButton' id=${session.sessionkey}>Excluir</p></button>
             </div>
-            <button  class=marginButtonBotCard ><p class='${sg.className}'>Nome: ${session.session}</p></button>
-            <button  class=marginButtonBotCard ><p class='${sg.className}'>Chave: ${session.sessionkey}</p></button>
-            <button id=conectarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton' id=${session.sessionkey}>Conectar</p></button>
-            <button id=desconectarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton desconectarButton' id=${session.sessionkey}>Desconectar</p></button>
-            <button id=deletarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton deleteButton' id=${session.sessionkey}>Excluir</p></button>
+            <div class='botCard back' id="botCardBack${session.sessionkey}"> 
+
+              <button id=indexFile${session.sessionkey} class="marginButtonBotCard fullSize" ><p class='${sg.className} addButton ${session.sessionkey}' id=indexFile${session.sessionkey}>Editar arquivo index</p></button>
+
+              <button id=sessionFile${session.sessionkey} class="marginButtonBotCard fullSize" ><p class='${sg.className} addButton ${session.sessionkey}' id=sessionFile${session.sessionkey}>Editar arquivo de session</p></button>
+
+              <button id=botFile${session.sessionkey} class="marginButtonBotCard fullSize " ><p class='${sg.className} addButton ${session.sessionkey}' id=botFile${session.sessionkey}>Editar arquivo de Bot</p></button>
+
+              <button id=dialogFile${session.sessionkey} class="marginButtonBotCard fullSize " ><p class='${sg.className} addButton ${session.sessionkey}' id=dialogFile${session.sessionkey}>Editar arquivo de dialogo</p></button>
+
+              <button style="color: #eeeeee !important;" class="addButton removeMargin" id="addFile${session.sessionkey}" >Enviar</button>
+              
+            </div>
+          </div>
+
+          <div class="divSvg" id="divSvgsvg${session.sessionkey}">
+          <svg id="svg${session.sessionkey}" xmlns="http://www.w3.org/2000/svg" height="3em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path id="svg${session.sessionkey}" d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+          </div>
         </div>
         `
+
+                    // <svg id="svg${session.sessionkey}" xmlns="http://www.w3.org/2000/svg" height="3em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path id="svg${session.sessionkey}" d="M307 34.8c-11.5 5.1-19 16.6-19 29.2v64H176C78.8 128 0 206.8 0 304C0 417.3 81.5 467.9 100.2 478.1c2.5 1.4 5.3 1.9 8.1 1.9c10.9 0 19.7-8.9 19.7-19.7c0-7.5-4.3-14.4-9.8-19.5C108.8 431.9 96 414.4 96 384c0-53 43-96 96-96h96v64c0 12.6 7.4 24.1 19 29.2s25 3 34.4-5.4l160-144c6.7-6.1 10.6-14.7 10.6-23.8s-3.8-17.7-10.6-23.8l-160-144c-9.4-8.5-22.9-10.6-34.4-5.4z"/></svg>
+
 
         if(count != 3 && count % 3 != 0 && count != sessions.length){
           text += `<div class="col-1"></div>`
@@ -171,6 +267,14 @@ export default function mainPage(params) {
         document.getElementById(`conectarSession${session.sessionkey}`).addEventListener("click", conectar, false);
         document.getElementById(`desconectarSession${session.sessionkey}`).addEventListener("click", desconectar, false);
         document.getElementById(`deletarSession${session.sessionkey}`).addEventListener("click", deletar, false);
+
+        document.getElementById(`svg${session.sessionkey}`).addEventListener("click", backPage, false);
+
+        document.getElementById(`indexFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
+        document.getElementById(`sessionFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
+        document.getElementById(`botFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
+        document.getElementById(`dialogFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
+        document.getElementById(`addFile${session.sessionkey}`).addEventListener("click", sendFile, false);
       })
     }
   
@@ -188,6 +292,7 @@ export default function mainPage(params) {
           </style>
           
           <Script type="text/javascript" src="/scripts/mainPage.js"/>
+          <script src="https://kit.fontawesome.com/0cc1b7e656.js" crossorigin="anonymous"></script>
   
         </Head>
         {/* className="mainTitle fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30" */}
@@ -210,7 +315,7 @@ export default function mainPage(params) {
             <div className={"botCards"} id={"botCards"}>
               
             </div>
-  
+
           </div>
   
         </main>

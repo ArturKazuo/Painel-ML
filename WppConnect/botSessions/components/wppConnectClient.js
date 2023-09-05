@@ -28,7 +28,7 @@ module.exports = class Bot {
 
             var imageBuffer = response;
             require('fs').writeFile(
-                `./qrCodes/${context.id}.png`,
+                `./qrCodes/${context}.png`,
                 imageBuffer['data'],
                 'binary',
                 function (err) {

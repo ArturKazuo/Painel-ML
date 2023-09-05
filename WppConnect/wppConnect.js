@@ -86,9 +86,16 @@ var shell = require('shelljs');
 
 var app = express();
 
-app.use(bodyParser.json(), cors({
-    origin: 'http://localhost:3000'
-}))
+// app.use(bodyParser.json(), cors({
+//     origin: 'http://localhost:3000'
+// }))
+app.use(bodyParser.json())
+app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    }),
+  );
+app.use(cors({origin: 'http://localhost:3000'}))
 
 
 app.listen(process.env.port || process.env.PORT || 3978, () => {
@@ -105,8 +112,9 @@ app.get('/startSessions', async function (req, res) {
     // shell.exit(1)
 
     setTimeout(async () => {
+        console.log('chamou')
         await fetch(`http://localhost:60008/generateQRCode?id=${req.query.id}`)    
-    }, 8000);
+    }, 7000);
     
 })
 
@@ -221,49 +229,49 @@ app.get('/copyFiles', async function (req, res) {
 
 app.get('/deleteFiles', async function (req, res) {
 
-    fs.unlink(`./botSessions/bot${req.query.id}.js`, (err) => {
-        if (err) {
-            console.log("erro: " + err)
-            throw err
-        }
+    try {
+        fs.unlinkSync(`./botSessions/bot${req.query.id}.js`);
         console.log("Deleted File successfully.");
-    });
+        
+    } catch (error) {
+        console.log(error);
+    }   
 
-    fs.unlink(`./botSessions/wppConnectSessions/${req.query.id}Sessions.js`, (err) => {
-        if (err) {
-            console.log("erro: " + err)
-            throw err
-        }
-    
+    try {
+        fs.unlinkSync(`./botSessions/wppConnectSessions/${req.query.id}Sessions.js`);
         console.log("Deleted File successfully.");
-    });
+                
+    } catch (error) {
+        console.log(error);
+    }   
 
-    fs.unlink(`./botSessions/bots/locker${req.query.id}.js`, (err) => {
-        if (err) {
-            console.log("erro: " + err)
-            throw err
-        }
-    
-        console.log("Deleted File successfully.");
-    });
 
-    fs.unlink(`./botSessions/dialogs/mainDialog${req.query.id}.js`, (err) => {
-        if (err) {
-            console.log("erro: " + err)
-            throw err
-        }
-    
+    try {
+        fs.unlinkSync(`./botSessions/bots/locker${req.query.id}.js`);
         console.log("Deleted File successfully.");
-    });
+                
+    } catch (error) {
+        console.log(error);
+    }   
 
-    fs.unlink(`./qrCodes/${req.query.id}.png`, (err) => {
-        if (err) {
-            console.log("erro: " + err)
-            throw err
-        }
-    
+
+    try {
+        fs.unlinkSync(`./botSessions/dialogs/mainDialog${req.query.id}.js`);
         console.log("Deleted File successfully.");
-    });
+                
+    } catch (error) {
+        console.log(error);
+    }   
+
+
+    try {
+        fs.unlinkSync(`./qrCodes/${req.query.id}.png`);
+        console.log("Deleted File successfully.");
+            
+    } catch (error) {
+        console.log(error);
+    }   
+
 
     res.json(
         {
@@ -277,10 +285,101 @@ app.get('/deleteFiles', async function (req, res) {
 
 })
 
-app.get('/deleteAccount', async (req, res) => {
-    // await client.firestore.delete(`Sessions/${req.query.email}`, {
-    //     project: 'meu-locker-myzap-test',
-    //     recursive: true,
-    //     yes: true
-    // }); 
+app.post('/changeFile', async function (req, res) {
+    
+    let file = req.body
+
+    let fileName = req.query.name
+
+    let final = '';
+
+    // console.log(file.code)
+
+    switch(req.query.type){
+        
+        case 'indexFile':
+            final = `bot${fileName}`
+            break;
+
+        case 'sessionFile':
+            final = `wppConnectSessions/${fileName}Sessions`
+            break;
+
+        case 'botFile':
+            final = `bots/locker${fileName}`
+            break;
+
+        case 'dialogFile':
+            final = `mainDialog/${fileName}`
+            break;
+
+        default: 
+            console.log('nops')
+
+    }
+
+    try {
+        await fs.writeFileSync(`${__dirname}/botSessions/${final}.js`, file.code)
+        res.status(200).send(JSON.stringify({
+            status: "ok"
+        }));
+    } catch (e) {
+        console.log("err", e);
+        res.status(500).send(JSON.stringify({
+            status: "error"
+        })); 
+    }
+
+
+    // res.end();
+        
+})
+
+app.get('/getFile', async function (req, res) {
+
+    let fileName = req.query.file;
+    let type = req.query.type;
+    let final = ''
+
+    // console.log(type)
+
+    switch(type){
+        
+        case 'indexFile':
+            final = `bot${fileName}`
+            break;
+
+        case 'sessionFile':
+            final = `wppConnectSessions/${fileName}Sessions`
+            break;
+
+        case 'botFile':
+            final = `bots/locker${fileName}`
+            break;
+
+        case 'dialogFile':
+            final = `mainDialog/${fileName}`
+            break;
+
+        default: 
+            console.log('nops')
+
+    }
+
+    console.log(fileName)
+
+    fs.readFile(`${__dirname}/botSessions/${final}.js`, async function (err, content) {
+        if (err) {
+            // res.writeHead(400, {'Content-type':'application/javascript'})
+            console.log("err", err);
+            // let errorImage = fs.readFileSync(`${__dirname}/imgs/errorFF.jpg`)
+            res.end('');    
+        } else {
+            //specify the content type in the response will be an image
+            // console.log('not weeoe', content.toString())
+            // res.writeHead(200,{'Content-type':'text/html'});
+            res.status(200).send(JSON.stringify(content.toString()));
+        }
+    });
+
 })

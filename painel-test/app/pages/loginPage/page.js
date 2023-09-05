@@ -71,7 +71,6 @@ export default function loginPage(params) {
             document.getElementById('loginAlerts').classList.add('wrongPassAlerts')
 
             flagChave = true
-
             
           }
 

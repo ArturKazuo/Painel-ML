@@ -1,0 +1,21 @@
+.outsideDiv {
+    height: 100% !important;
+}
+
+.insideDiv {
+    width: 100%;
+    position: fixed;
+    bottom: 0px;
+    display: flex;
+    justify-content: center;
+    background-color: #333333;
+}
+
+.insideDiv p {
+    color: #eeeeee;
+} 
+
+.monacoButtonDiv {
+    width: 50%;
+    justify-content: space-evenly;
+}

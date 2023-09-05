@@ -2,7 +2,7 @@
 // |__) /  \  |  |__/ |  |  
 // |__) \__/  |  |  \ |  |  
 
-const Client = require('./components/wppConnectClient');
+const Client = require('../components/wppConnectClient');
 var express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors')
@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs')
 var shell = require('shelljs');
 
-const SESSION_NAME = process.env.APINAME || 'FlashSessions1';
+let SESSION_NAME = null;
 const API_PORT = process.env.APIPORT || 60008;
 const CHATBOT_PORT = process.env.CHATBOT_PORT || 3979;
 const CALLBACK_RECEIVE = process.env.CALLBACK_RECEIVE || 'http://localhost';
@@ -23,7 +23,7 @@ require('dotenv').config();
 const use_sockets = false;
 
 //WhatsApp Server
-const client;
+let client = {};
 
 
 async function receiveMessage(text, contact, channelData, msg) {
@@ -158,13 +158,15 @@ app.get('/getNumber', async function (req, res) {
 
 });
 
-app.post('/generateQRCode', async function (req, res) {
+app.get('/generateQRCode', async function (req, res) {
 
   console.log("resques: ", req.query)
 
   let id = req.query.id
 
-  client = new Client(SESSION_NAME, receiveMessage, req.query.id)
+  SESSION_NAME = id
+
+  client = new Client(SESSION_NAME, receiveMessage, id)
 
   // let qrCode = await generateQRCode(req.query)
 

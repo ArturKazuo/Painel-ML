@@ -100,11 +100,10 @@ export default function loginPage(params) {
     const alterarDados = async () => {
 
         // <div class="dadosDiv">
-        //         <input class=${sg.className} value="${user.nome}"></input>
-        //         <input class=${sg.className} value="${user.email}"></input>
-        //         <input class=${sg.className} value="${user.senha}"></input>
-                
-        //     </div>
+        //     <input class=${sg.className} value="${user.nome}"></input>
+        //     <input class=${sg.className} value="${user.email}"></input>
+        //     <input class=${sg.className} value="${user.senha}"></input>
+        // </div>
 
         const users = (await getDocs(collection(db, `painelUsers`))).docs.map(doc => doc.data())
 
@@ -200,21 +199,6 @@ export default function loginPage(params) {
             console.log(user)
             if(user.email == window.sessionStorage.getItem('user')){
 
-                // document.getElementById('addSessionDiv').innerHTML = `
-                //     <p class="sg.className chaveErro" >Esta chave de sessão já está sendo utilizada, insira outra.</p>
-                // `
-
-                // document.getElementById('addSessionDiv').style.border = "2px solid #d20808"
-
-                // document.getElementById('addSessionButton').innerHTML = `
-                //     <div class=multipleButtons>
-                //         <a href="/pages/addSession" class="addButton"><p class=sg.className>Tentar novamente</p></a>
-                //         <a href="/pages/mainPage" class="addButton"><p class=sg.className>Voltar para a página inicial</p></a>
-                //     </div>
-                // `
-
-                // flagChave = true
-
                 document.getElementById('loginDiv').innerHTML = `
                     <h3 class=${sg.className}>Dados</h3>
                     <div class="dadosDiv" id="dadosDiv">
@@ -259,13 +243,6 @@ export default function loginPage(params) {
 
           <NavBar />
 
-          {/* <nav className={sg.className, "navbar"}>
-            <Image src={logoML} alt=""/>
-            <Link href="/" ><p className={sg.className, "navLink"}>Home</p><div className={"divNavInside"}></div></Link>
-            <Link href="/pages/about" ><p className={sg.className, "navLink"}>Outro</p><div className={"divNavInside"}></div></Link>
-            <Link href="/pages/sobre" ><p className={sg.className, "navLink"}>Sobre</p><div className={"divNavInside"}></div></Link>
-          </nav> */}
-  
           <div className={""}>
   
             <div className={"loginMainDiv"}>
