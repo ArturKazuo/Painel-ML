@@ -4,7 +4,7 @@
 const { ActivityHandler, TurnContext } = require('botbuilder');
 
 const fetch = require('node-fetch');
-const { MainDialog } = require('../dialogs/mainDialogMeuLocker')
+const { MainDialog } = require('../dialogs/mainDialogkazuoTeste')
 
 // The accessor names for the conversation data and user profile state property accessors.
 const CONVERSATION_DATA_PROPERTY = 'conversationData';
@@ -35,56 +35,7 @@ class LockerCadastroManagementBot extends ActivityHandler {
             let texto;
             let regexResult;
 
-            if (turnContext.activity?.text) {
-                texto = turnContext.activity?.text.trim();
-                regexResult = texto.match(new RegExp(/gostaria de me cadastrar (.*)/i))
-            }
-
-             
-            // console.log("\n\nchannelDataRequest", this.conversationState);
-            // console.log("\n\nconversationData", JSON.stringify(conversationData));
-            // console.log("\n\ntexto", texto);
-            // console.log("\n\nregex: ", regexResult)
-
-            if(regexResult){
-
-                const lockerID = regexResult[1]
-                
-                conversationData.lockerID = lockerID;
-                conversationData.start = true;
-
-                this.regexResult = regexResult
-
-                await this.dialog.run(turnContext, this.conversationDataAccessor, conversationData.data, conversationData)
-
-
-            } else if(channelDataRequest?.timeoutRequest) {
-                // console.log("\n\n*********************** CHEGOU NO TIMEOUT ********************************\n\n")
-
-                await this.dialog.run(turnContext, this.conversationDataAccessor, conversationData.data, conversationData)
-
-            } else if((conversationData?.start) && (!conversationData?.finished)){
-
-                // const lockerID = this.regexResult[1]
-
-                // conversationData = {
-                //     ...conversationData,
-                //     data: {
-                //         lockerID: lockerID
-                //     }
-                // }
-
-                //console.log("conversation: ", conversationData)
-
-                await this.dialog.run(turnContext, this.conversationDataAccessor, conversationData, conversationData)
-
-            } else if (turnContext.activity?.valueType == "ciphertext") {
-
-                await turnContext.sendActivity(
-                    `Favor enviar a última mensagem novamente.`
-                );
-
-            }
+            await this.dialog.run(turnContext, this.conversationDataAccessor, conversationData.data, conversationData)
 
 
             await next();

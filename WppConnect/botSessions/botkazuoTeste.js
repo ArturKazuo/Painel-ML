@@ -15,7 +15,7 @@ const { BotFrameworkAdapter,
     CloudAdapter,
     ConfigurationBotFrameworkAuthentication } = require('botbuilder');
 const { QiraWhatsAppAdapter } = require('./adapters/QiraWhatsAppAdapter');
-const { LockerCadastroManagementBot } = require('./bots/lockerCadastroManagementBot');
+const { LockerCadastroManagementBot } = require('./bots/lockerkazuoTeste');
 // This bot's main dialog.
 const { sendText, getWhatsappRequest } = require('./functions/whatsAppSender')
 

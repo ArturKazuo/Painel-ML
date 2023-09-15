@@ -27,7 +27,8 @@ class MainDialog extends ComponentDialog {
         this.addDialog(new TextPrompt('TextPrompt'))
             // .addDialog(mainDialog)
             .addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG, [
-                this.stepCelular.bind(this),
+                this.stepFirst.bind(this),
+                this.stepSecond.bind(this),
                 
                 // this.enderecoAsk.bind(this),
                 // this.confirmationReceive.bind(this),
@@ -86,13 +87,22 @@ class MainDialog extends ComponentDialog {
      */
 
 
-    async stepCelular(stepContext) {
+    async stepFirst(stepContext) {
 
         const mainDetails = stepContext.options;
 
         stepContext.context.sendActivity('Olá! Sou o Bot de WhatsApp do Painel Meu Locker. ')
 
-        return await stepContext.next(mainDetails.stepCelular);
+        return await stepContext.next();
+    }
+
+    async stepSecond(stepContext) {
+
+        const mainDetails = stepContext.options;
+
+        stepContext.context.sendActivity('No momento, só posso enviar estas mensagens. Caso desejar modificar minhas mensagens, edite o arquivo de diálogo na página principal do painel.')
+        
+        return await stepContext.next();
     }
 
     async finalStep(stepContext){
@@ -108,6 +118,7 @@ class MainDialog extends ComponentDialog {
     async stopStep(stepContext) {
         await stepContext.sendActivity(`Obrigado ${stepContext._activity.from.name}.\nA atualização ou inserção de cadastro foi interrompida.\nVocê pode reiniciá-la enviando a mensagem para cadastro ou atualização.`)
         return await this.finalStep(stepContext);
+        //
     }
 
 }

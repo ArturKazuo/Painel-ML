@@ -9,7 +9,7 @@ import Script from 'next/script'
 import { Space_Grotesk } from 'next/font/google'
 import alo from '../../../imgs/alo.png'
 import wpp from '../../../imgs/wpp.png'
-import error from '../../../imgs/errorFF.jpg'
+import error from '../../../imgs/errorFF.png'
 import loading from '../../../imgs/giphy.gif'
 import logoML from '../../../imgs/logo-meulocker.svg'
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -44,8 +44,9 @@ export default function navBar(params) {
                 <Image src={logoML} alt="" id={"imgML"} />
             </div>
             <Link href="/pages/mainPage" ><p className={sg.className, "navLink"}>Home</p><div className={"divNavInside"}></div></Link>
-            <Link href="https://meulocker.com.br/" target={"blank"} ><p className={sg.className, "navLink"}>Conheça a empresa</p><div className={"divNavInside"}></div></Link>
             <Link href="/pages/conta" ><p className={sg.className, "navLink"}>Conta</p><div className={"divNavInside"}></div></Link>
+            <Link href="/pages/ajuda" ><p className={sg.className, "navLink"}>Ajuda</p><div className={"divNavInside"}></div></Link>
+            <Link href="https://meulocker.com.br/" target={"blank"} ><p className={sg.className, "navLink"}>Conheça a empresa</p><div className={"divNavInside"}></div></Link>
         </nav>
     )
 }

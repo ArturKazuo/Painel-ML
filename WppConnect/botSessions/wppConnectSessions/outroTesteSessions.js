@@ -11,8 +11,8 @@ const fs = require('fs')
 var shell = require('shelljs');
 
 let SESSION_NAME = null;
-const API_PORT = process.env.APIPORT || 60008;
-const CHATBOT_PORT = process.env.CHATBOT_PORT || 3979;
+const API_PORT = process.env.SENDERPORT || 60008; //favor não editar aqui, edite as portas no arquivo de portas
+const CHATBOT_PORT = process.env.PORT || 3979;    //favor não editar aqui, edite as portas no arquivo de portas
 const CALLBACK_RECEIVE = process.env.CALLBACK_RECEIVE || 'http://localhost';
 const CALLBACK_ROUTE = process.env.CALLBACK_RECEIVE || 'api/whatsapp/messages';
 
@@ -207,7 +207,6 @@ app.get('/stopSession', async function (req, res) {
   shell.exit(1)
 
 })
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -11,8 +11,8 @@ const fs = require('fs')
 var shell = require('shelljs');
 
 let SESSION_NAME = null;
-const API_PORT = process.env.APIPORT || 60008;
-const CHATBOT_PORT = process.env.CHATBOT_PORT || 3979;
+const API_PORT = process.env.SENDERPORT || 60008;
+const CHATBOT_PORT = process.env.PORT || 3979;
 const CALLBACK_RECEIVE = process.env.CALLBACK_RECEIVE || 'http://localhost';
 const CALLBACK_ROUTE = process.env.CALLBACK_RECEIVE || 'api/whatsapp/messages';
 

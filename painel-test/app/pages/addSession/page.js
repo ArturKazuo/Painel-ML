@@ -5,8 +5,9 @@ import Link from 'next/link'
 import Head from 'next/head'
 import alo from '../../imgs/alo.png'
 import wpp from '../../imgs/wpp.png'
-import error from '../../imgs/errorFF.jpg'
-import loading from '../../imgs/giphy.gif'
+import error from '../../imgs/errorFF.png'
+import loading from '../../imgs/Spinner310.svg'
+import loadingGreen from '../../imgs/Spinner310Green4.svg'
 import logoML from '../../imgs/logo-meulocker.svg'
 import { Space_Grotesk } from 'next/font/google'
 import "../../addSession.css"
@@ -17,6 +18,8 @@ import { getFirestore, collection, getDocs, addDoc, setDoc, doc } from 'firebase
 import { useRouter } from 'next/navigation';
 import NavBar from '../components/navBar/page.js'
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const sg = Space_Grotesk({ subsets: ['latin'], display: 'swap', adjustFontFallback: false })
 
@@ -24,21 +27,38 @@ export default function Home() {
 
     const { push } = useRouter();
 
+    const checkUser = async () => {
+        const users = (await getDocs(collection(db, 'painelUsers'))).docs.map(doc => doc.data())
+        const userActual = window.sessionStorage.getItem('user')
+
+        console.log(users)
+
+        let flagUser = false
+        
+        users.forEach(async (user) => {
+            // console.log(user)
+            console.log(user.email)
+            if(user.email === userActual){
+                flagUser = true
+            } 
+
+        })
+
+        if(!flagUser){
+            push('/pages/loginPage')
+        }
+    }   
+
     const loadPage = async () => {
-        document.getElementById('mainID').innerHTML = document.getElementById('mainID').innerHTML + `<div class=mainLoad ><img src="${loading.src}" /></div>`
+        document.getElementById('mainID').innerHTML = document.getElementById('mainID').innerHTML + `<div class=mainLoad ><img src="${loadingGreen.src}" /></div>`
     }
 
     const stopLoadPage = async () => {
-        document.querySelector('.mainLoad').classList.add('noDisplay')
-    }
+        document.querySelector('.mainLoad').remove()
+      }
 
     const addAnotherSession = () => {
         document.getElementById('addSessionDiv').innerHTML = `
-            <p  class=sg.className>Servidor e porta:</p>
-            <div class="divTextarea">
-                <input id="port" class=""></input>
-                <div class="divTextareaInside"></div>
-            </div>
             <p class=sg.className>Chave da sessão:</p>
             <div class="divTextarea">
                 <input id="chave" class=""></input>
@@ -47,16 +67,6 @@ export default function Home() {
             <p class=sg.className>Nome da sessão:</p>
             <div class="divTextarea">
                 <input id="nome" class=""></input>
-                <div class="divTextareaInside"></div>
-            </div>
-            <p class=sg.className>Aparelho/Dispositivo:</p>
-            <div class="divTextarea">
-                <input id="aparelho" class=""></input>
-                <div class="divTextareaInside"></div>
-            </div>
-            <p class=sg.className>Token:</p>
-            <div class="divTextarea">
-                <input id="token" class=""></input>
                 <div class="divTextareaInside"></div>
             </div>
         `
@@ -71,13 +81,15 @@ export default function Home() {
     const addSession = async () => {
 
         const nome = document.getElementById('nome').value 
-        const aparelho = document.getElementById('aparelho').value 
-        const port = document.getElementById('port').value 
+        // const aparelho = document.getElementById('aparelho').value 
+        // const port = document.getElementById('port').value 
         let chave = document.getElementById('chave').value
-        const token = document.getElementById('token').value  
+        // const token = document.getElementById('token').value  
         let flagChave = false
 
         chave = chave.replaceAll(' ', '')
+
+        loadPage()
 
         if(chave == null || chave == undefined || chave == ""){
             document.getElementById('addSessionDiv').innerHTML = `
@@ -91,10 +103,12 @@ export default function Home() {
                 </div>
             `
 
+            stopLoadPage()
+
             return
         }
 
-        if((nome == undefined || nome == "") || (aparelho == undefined || aparelho == "") || (port == undefined || port == "") || (chave == undefined || chave == "") || (token == undefined || token == "")){
+        if((nome == undefined || nome == "") || (chave == undefined || chave == "")){
             document.getElementById('addSessionDiv').innerHTML = `
                 <p class="sg.className chaveErro" >Preencha todos os campos.</p>
             `
@@ -105,6 +119,8 @@ export default function Home() {
                     <a href="/pages/mainPage" class="addButton"><p class=sg.className>Voltar para a página inicial</p></a>
                 </div>
             `
+
+            stopLoadPage()
 
             return 
         }
@@ -137,6 +153,8 @@ export default function Home() {
 
                 flagChave = true
 
+                stopLoadPage()
+
                 return 
             }
 
@@ -146,28 +164,44 @@ export default function Home() {
             return
         }
 
-        const docRefID = doc(db, `Sessions/${window.sessionStorage.getItem('user')}/sessions`, chave)
-
-        const docRef = await setDoc(docRefID, {
+        const data = {
             Engine: '2',
             WABrowserId: "MultiDevice",
             WASecretBundle: "MultiDevice",
             WAToken1: "MultiDevice",
             WAToken2: "MultiDevice",
-            apitoken: token,
             session: nome,
             sessionkey: chave,
+            PORT: getRandomInt(3000, 3300),
+            APIPORT: getRandomInt(61000, 62000),
+            APINAME: chave,
             wh_connect: "",
             wh_message: "",
             wh_qrcode: "",
             wh_status: "",
-        });
+        }
 
-        loadPage()
+        const docRefID = doc(db, `Sessions/${window.sessionStorage.getItem('user')}/sessions`, chave)
 
-        await fetch(`http://localhost:3978/copyFiles?id=${chave}`).then(async () => {
+        const docRef = await setDoc(docRefID, data);
 
-        })
+        // await fetch(`http://localhost:3978/copyFiles?id=${chave}`).then(async () => {
+
+        // })
+
+        await fetch(`http://localhost:3978/copyFiles?id=${chave}`, {
+                method: "post",
+                mode: 'cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)      
+            }).then(async (response) => {
+                console.log('response: ', await response.json())
+                // setTimeout(async () => {
+                //     // push('/pages/mainPage')
+                // }, 5000);
+                // window.alert('Arquivo salvo com sucesso!')
+                // document.querySelector('.outsideDiv').innerHTML = `<div class=mainLoad ><p class="${sg.className}" >Sucesso ao salvar</p>></div>`
+            })
 
         console.log("Document written with ID: ", docRef);
 
@@ -193,6 +227,7 @@ export default function Home() {
         if(window.sessionStorage.getItem('user') == undefined || window.sessionStorage.getItem('user') == null || window.sessionStorage.getItem('user') == ""){
             push('/pages/loginPage')
           } 
+        checkUser()
         document.getElementById('addSessionButtonButton').addEventListener("click", addSession);
     }
     
@@ -225,11 +260,11 @@ export default function Home() {
 
         <div className={"addSessionMainDiv"}>
             <div className={"addSessionDiv"} id={"addSessionDiv"}>
-                <p  className={sg.className}>Servidor e porta:</p>
+                {/* <p  className={sg.className}>Servidor e porta:</p>
                 <div className={"divTextarea"}>
                     <input id={"port"} className={""}></input>
                     <div className={"divTextareaInside"}></div>
-                </div>
+                </div> */}
                 <p className={sg.className}>Chave da sessão:</p>
                 <div className={"divTextarea"}>
                     <input id={"chave"} className={""}></input>
@@ -240,7 +275,7 @@ export default function Home() {
                     <input id={"nome"} className={""}></input>
                     <div className={"divTextareaInside"}></div>
                 </div>
-                <p className={sg.className}>Aparelho/Dispositivo:</p>
+                {/* <p className={sg.className}>Aparelho/Dispositivo:</p>
                 <div className={"divTextarea"}>
                     <input id={"aparelho"} className={""}></input>
                     <div className={"divTextareaInside"}></div>
@@ -249,7 +284,7 @@ export default function Home() {
                 <div className={"divTextarea"}>
                     <input id={"token"} className={""}></input>
                     <div className={"divTextareaInside"}></div>
-                </div>
+                </div> */}
             </div>
         </div>
 
@@ -266,3 +301,9 @@ export default function Home() {
     </>
   )
 }
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+  }

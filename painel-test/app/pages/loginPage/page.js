@@ -9,8 +9,8 @@ import Script from 'next/script'
 import { Space_Grotesk } from 'next/font/google'
 import alo from '../../imgs/alo.png'
 import wpp from '../../imgs/wpp.png'
-import error from '../../imgs/errorFF.jpg'
-import loading from '../../imgs/giphy.gif'
+import error from '../../imgs/errorFF.png'
+import loading from '../../imgs/Spinner310Green4.svg'
 import logoML from '../../imgs/logo-meulocker.svg'
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from 'react'
@@ -97,7 +97,7 @@ export default function loginPage(params) {
 
     const myFunc = async () => {
       document.getElementById(`loginButtonButton`).addEventListener("click", login, false);
-      document.getElementById(`createAccount`).addEventListener("click", loadPage, false);
+      // document.getElementById(`createAccount`).addEventListener("click", loadPage, false);
       let ps = document.querySelectorAll('p')
 
       ps.forEach(p => {
@@ -110,9 +110,21 @@ export default function loginPage(params) {
         h2.classList.add('white')
       })
 
-      if(window.sessionStorage.getItem('user')){
-        push('/pages/mainPage')
-      } 
+      const users = (await getDocs(collection(db, 'painelUsers'))).docs.map(doc => doc.data())
+      const userActual = window.sessionStorage.getItem('user')
+
+      console.log(users)
+      
+      users.forEach(async (user) => {
+        // console.log(user)
+        console.log(user.email)
+        if(user.email === userActual){
+
+            push('/pages/mainPage')
+          }
+
+      })
+
     }
   
     useEffect(() => {
@@ -181,7 +193,7 @@ export default function loginPage(params) {
                 <button className={"addButton"} id={"loginButtonButton"}><p className={sg.className}>Login</p></button>
             </div>
 
-            <div className={"linkDivOutside"}> 
+            {/* <div className={"linkDivOutside"}> 
               <div className={"linkDiv"}> 
                   <Link href="/pages/cadastroPage" className={"linkDivA"} id={"createAccount"}>
                     <p className={sg.className, "navLink", "noShadowBox"}>Criar uma conta</p>
@@ -191,7 +203,7 @@ export default function loginPage(params) {
                     </div>  
                   </Link>
               </div>
-            </div>
+            </div> */}
   
           </div>
   

@@ -9,8 +9,8 @@ import Script from 'next/script'
 import { Space_Grotesk } from 'next/font/google'
 import alo from '../../imgs/alo.png'
 import wpp from '../../imgs/wpp.png'
-import error from '../../imgs/errorFF.jpg'
-import loading from '../../imgs/giphy.gif'
+import error from '../../imgs/errorFF.png'
+import loading from '../../imgs/Spinner310Green4.svg'
 import logoML from '../../imgs/logo-meulocker.svg'
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from 'react'
@@ -42,18 +42,20 @@ export default function cadastroPage(params) {
       let passCheck = document.getElementById('passCheck').value
 
       if(password !== passCheck){
-        document.getElementById('passCheck').classList.add('wrongPass')
-        document.getElementById('loginAlerts').innerHTML = `
-          <p class="${sg.className} white">Erro na confirmação da senha, certifique-se de que está digitando a mesma senha.</p>
-        `
-        document.getElementById('loginAlerts').classList.add('wrongPassAlerts')
+        // document.getElementById('passCheck').classList.add('wrongPass')
+        // document.getElementById('loginAlerts').innerHTML = `
+        //   <p class="${sg.className} white">Erro na confirmação da senha, certifique-se de que está digitando a mesma senha.</p>
+        // `
+        // document.getElementById('loginAlerts').classList.add('wrongPassAlerts')
+
+        window.alert('Erro na confirmação da senha, certifique-se de que está digitando a mesma senha.')
 
         return false
 
       } else {
-        document.getElementById('passCheck').classList.remove('wrongPass')
-        document.getElementById('loginAlerts').classList.remove('wrongPassAlerts')
-        document.getElementById('loginAlerts').innerHTML = ``;
+        // document.getElementById('passCheck').classList.remove('wrongPass')
+        // document.getElementById('loginAlerts').classList.remove('wrongPassAlerts')
+        // document.getElementById('loginAlerts').innerHTML = ``;
         return password
       }
 
@@ -63,6 +65,11 @@ export default function cadastroPage(params) {
       
       let nome = document.getElementById('nome').value
       let email = document.getElementById('email').value
+      let papel = document.getElementById('papel').value
+      if(papel == ""){
+        window.alert('Selecione o papel do usuário.')
+        return
+      }
       let senha = await checkPassword()
 
       let flagChave = false
@@ -80,11 +87,13 @@ export default function cadastroPage(params) {
           // console.log(user.email)
           if(user.email === email){
 
-                document.getElementById('loginAlerts').innerHTML = `
-                  <p class="${sg.className} white">Este email já está sendo utilizado, insira outro.</p>
-                `
+                // document.getElementById('loginAlerts').innerHTML = `
+                //   <p class="${sg.className} white">Este email já está sendo utilizado, insira outro.</p>
+                // `
 
-                document.getElementById('loginAlerts').classList.add('wrongPassAlerts')
+                // document.getElementById('loginAlerts').classList.add('wrongPassAlerts')
+
+                window.alert('Este email já está sendo utilizado, insira outro.')
 
                 flagChave = true
 
@@ -103,6 +112,7 @@ export default function cadastroPage(params) {
           let user = {
             nome: nome,
             email: email,
+            papel: papel,
             senha: senha
           }
 
@@ -123,7 +133,40 @@ export default function cadastroPage(params) {
     }
 
     const myFunc = async () => {
-      document.getElementById(`createAccount`).addEventListener("click", loadPage, false);
+
+      if(window.sessionStorage.getItem('user') == undefined || window.sessionStorage.getItem('user') == null || window.sessionStorage.getItem('user') == ""){
+        await push('/pages/loginPage')
+      } 
+
+      const users = (await getDocs(collection(db, 'painelUsers'))).docs.map(doc => doc.data())
+      const userActual = window.sessionStorage.getItem('user')
+
+      console.log(users)
+      // console.log(userActual)
+
+      let flagAchou = false
+
+      users.forEach(async (user) => {
+        // console.log(user)
+        console.log(user.email)
+        if(user.email === userActual){
+
+              if(user.papel != 'admin'){
+                await push('/pages/loginPage')
+              }
+
+              flagAchou = true
+
+              return 
+          }
+
+      })
+
+      if(!flagAchou){
+        push('/pages/loginPage')
+      }
+
+      // document.getElementById(`createAccount`).addEventListener("click", loadPage, false);
       document.getElementById(`loginButtonButton`).addEventListener("click", cadastrar, false);
       let ps = document.querySelectorAll('p')
 
@@ -136,9 +179,9 @@ export default function cadastroPage(params) {
       h2s.forEach(h2 => {
         h2.classList.add('white')
       })
-      if(window.sessionStorage.getItem('user')){
-        push('/pages/mainPage')
-      } 
+      // if(window.sessionStorage.getItem('user')){
+      //   push('/pages/mainPage')
+      // } 
     }
   
     useEffect(() => {
@@ -192,6 +235,14 @@ export default function cadastroPage(params) {
                         <input id={"email"} className={""}></input>
                         <div className={"divTextareaInside"}></div>
                     </div>
+                    <p className={sg.className}>Papel:</p>
+                    <div className={"divTextarea"}>
+                      <select className={"select"} name="papel" id="papel">
+                        <option value="">--Selecione uma opção--</option>
+                        <option value="admin">Admin</option>
+                        <option value="usuario">Usuário</option>
+                      </select>
+                    </div>
                     <p className={sg.className}>Senha:</p>
                     <div className={"divTextarea"}>
                         <input id={"pass"} className={""}></input>
@@ -206,17 +257,17 @@ export default function cadastroPage(params) {
             </div>
 
             
-            <div className={"loginAlertsDiv"}> 
+            {/* <div className={"loginAlertsDiv"}> 
                 <div className={"loginAlerts"} id={"loginAlerts"}> 
                 
                 </div>
-            </div>
+            </div> */}
 
-            <div className={"loginButton"} id={"loginButton"}> 
+            <div style={{margin: '0px 0px 0px 0px !important',}} className={"loginButton"} id={"loginButton"}> 
                 <button className={"addButton"} id={"loginButtonButton"}><p className={sg.className}>Cadastrar</p></button>
             </div>
 
-            <div className={"linkDivOutside"}> 
+            {/* <div className={"linkDivOutside"}> 
               <div className={"linkDiv"}> 
                   <Link href="/pages/loginPage" className={"linkDivA"} id={"createAccount"}>
                     <p className={sg.className, "navLink", "noShadowBox"}>Fazer login</p>
@@ -226,7 +277,7 @@ export default function cadastroPage(params) {
                     </div>  
                   </Link>
               </div>
-            </div>
+            </div> */}
   
           </div>
   

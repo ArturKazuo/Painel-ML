@@ -15,7 +15,7 @@ const { BotFrameworkAdapter,
     CloudAdapter,
     ConfigurationBotFrameworkAuthentication } = require('botbuilder');
 const { QiraWhatsAppAdapter } = require('./adapters/QiraWhatsAppAdapter');
-const { LockerCadastroManagementBot } = require('./bots/lockerCadastroManagementBot');
+const { LockerCadastroManagementBot } = require('./bots/lockeroutroTeste');
 // This bot's main dialog.
 const { sendText, getWhatsappRequest } = require('./functions/whatsAppSender')
 
@@ -23,8 +23,8 @@ const { sendText, getWhatsappRequest } = require('./functions/whatsAppSender')
 const ENV_FILE = path.join(__dirname, '.env');
 dotenv.config({ path: ENV_FILE });
 
-const chatbotPORT = process.env.port || process.env.PORT || 3979;
-const senderPORT = process.env.senderport ||process.env.SENDERPORT || 60008;
+const chatbotPORT = process.env.port || process.env.PORT || 3979;               //favor não editar aqui, edite as portas no arquivo de portas
+const senderPORT = process.env.senderport ||process.env.SENDERPORT || 60008;    //favor não editar aqui, edite as portas no arquivo de portas
 
 // Create HTTP servers
 const server = restify.createServer();
@@ -53,7 +53,6 @@ whatsAppAdapter.onTurnError = async (context, error) => {
     await conversationState.delete(context);
 };
 
-// Listen for incoming request from Twilio
 server.post('/api/whatsapp/messages',async (req, res) => {
     // console.log('API', JSON.stringify(req.body))
     // console.log('API Headers', JSON.stringify(req.headers))
@@ -63,10 +62,6 @@ server.post('/api/whatsapp/messages',async (req, res) => {
         await bot.run(context);
     });
 });
-
-// server.post("/recebi", async (req, res) => {
-    // console.log("\n\n\n callback recebido \n\n", req.body)
-// })
 
 server.post('/api/notify', async (req, res) => {
 

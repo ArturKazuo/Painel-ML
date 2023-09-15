@@ -5,6 +5,10 @@ const cors = require('cors')
 const bodyParser = require('body-parser');
 const fs = require('fs')
 var shell = require('shelljs');
+const { firebaseConfig } = require('./firebase.config.js')
+const { initializeApp } = require('firebase/app')
+const { getFirestore, collection, getDocs, doc, addDoc, setDoc, deleteDoc } = require('firebase/firestore/lite');
+const pm2 = require('pm2')
 // const client = require('firebase-tools')
 
 // async function generateQRCode(context, qrcode) {
@@ -84,6 +88,9 @@ var shell = require('shelljs');
 
 // }
 
+const appDB = initializeApp(firebaseConfig);
+const db = getFirestore(appDB);
+
 var app = express();
 
 // app.use(bodyParser.json(), cors({
@@ -98,22 +105,43 @@ app.use(
 app.use(cors({origin: 'http://localhost:3000'}))
 
 
-app.listen(process.env.port || process.env.PORT || 3978, () => {
+app.listen(process.env.port || process.env.PORT || 3978, async () => {
     console.log(`\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator`);
-    console.log(`\nTo talk to your bot, open the emulator select "Open Bot"`);
+    console.log(`\nTo talk to your bot, open the emulator select "Open Bot" on 3978`);
+
 });
+
 
 app.get('/startSessions', async function (req, res) {
 
-    // console.log('foi foi foi foi foi')
-
-    shell.exec(`npx pm2 start ./botSessions/bot${req.query.id}.js`)
-    shell.exec(`npx pm2 start ./botSessions/wppConnectSessions/${req.query.id}Sessions.js`)
+    shell.exec(`npx pm2 start ./botSessions/envs/ENV${req.query.id}.config.js`)
+    // shell.exec(`npx pm2 start ./botSessions/bot${req.query.id}.js`)
+    // shell.exec(`npx pm2 start ./botSessions/wppConnectSessions/${req.query.id}Sessions.js`)
     // shell.exit(1)
 
+    const sessions = (await getDocs(collection(db, `Sessions/${req.query.name}/sessions`))).docs.map(doc => doc.data())
+
+    let senderPort = ''
+
     setTimeout(async () => {
+        for(const session of sessions){
+            if(session.sessionkey == req.query.id){
+                console.log('found')
+                senderPort = session.APIPORT
+            }
+        }
         console.log('chamou')
-        await fetch(`http://localhost:60008/generateQRCode?id=${req.query.id}`)    
+        let url = `http://localhost:${senderPort}/generateQRCode?id=${req.query.id}`
+        console.log(url)
+        await fetch(`http://localhost:${senderPort}/generateQRCode?id=${req.query.id}`)    
+        res.json(
+            {
+                result: "ok",
+                error: null
+            }
+        )
+    
+        res.end()
     }, 7000);
     
 })
@@ -122,13 +150,20 @@ app.get('/disconnectSessions', async function (req, res) {
 
     // console.log('foi foi foi foi foi')
 
-    shell.exec(`npx pm2 stop bot${req.query.id}`)
-    shell.exec(`npx pm2 stop ${req.query.id}Sessions`)
-    // shell.exit(1)
+    shell.exec(`npx pm2 stop ./botSessions/envs/ENV${req.query.id}.config.js`)
 
-    // setTimeout(async () => {
-    //     await fetch(`http://localhost:60008/generateQRCode?id=${req.query.id}`)    
-    // }, 8000);
+    // shell.exec(`npx pm2 stop bot${req.query.id}`)
+    // shell.exec(`npx pm2 stop ${req.query.id}Sessions`)
+    // // shell.exit(1)
+
+    console.log('req.query.id: ', req.query.id)
+
+    try{
+        await fs.writeFileSync( `./botSessions/status/${req.query.id.replace(' ','')}.txt`, 'browserCloseled')
+        // console.log('alooooooooooooooooooooooou')
+    } catch(e){
+        console.log("error browserClosed: ", err);
+    }
 
     res.json(
         {
@@ -166,27 +201,61 @@ app.get('/getImage', async function (req, res) {
     fs.readFile(`${__dirname}/qrCodes/` + pic + ".png", async function (err, content) {
         if (err) {
             res.writeHead(400, {'Content-type':'image/png'})
-            // console.log("err");
-            let errorImage = fs.readFileSync(`${__dirname}/imgs/errorFF.jpg`)
+            // console.log("err Triangle");
+            let errorImage = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
             res.end(errorImage);    
         } else {
             //specify the content type in the response will be an image
             // console.log('not weeoe')
-            res.writeHead(200,{'Content-type':'image/png'});
-            res.end(content);
+            fs.readFile(`${__dirname}/botSessions/status/` + pic + ".txt", async function (err, content) {
+                if (err) {
+                    res.writeHead(400, {'Content-type':'image/png'})
+                    console.log("err2");
+                    let errorImage = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
+                    res.end(errorImage);    
+                } else {
+
+                    let finalImg = '';
+
+                    if(content == 'notLogged' || content == 'desconnectedMobile' ){
+                        finalImg = fs.readFileSync(`${__dirname}/qrCodes/${pic}.png`)
+                    } else if(content == 'browserCloseled' || content == 'autocloseCalled' ||  content == 'serverClose' ||  content == 'deleteToken' ||  content == 'qrReadFail'){
+                        finalImg = fs.readFileSync(`${__dirname}/imgs/errorFF.png`)
+                    } else if(content == 'isLogged' || content == 'inChat'){
+                        finalImg = fs.readFileSync(`${__dirname}/imgs/greenCheck.png`)
+                    } else if(content == 'qrReadError'){
+                        finalImg = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
+                    } else {
+                        // console.log('naaaada nada nada')
+                        finalImg = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
+                    }
+                    
+                    res.writeHead(200,{'Content-type':'image/png'});
+                    res.end(finalImg);
+                }
+            });  
         }
     });
 
 })
 
-app.get('/copyFiles', async function (req, res) {
+app.post('/copyFiles', async function (req, res) {
 
     fs.copyFile(`./templates/botMeuLocker.js`, `./botSessions/bot${req.query.id}.js`, (err) => {
         if(err){
             console.log("erro: " + err)
             throw err
         }
-        console.log("created")
+        console.log("index created")
+        fs.readFile(`${__dirname}/botSessions/bot${req.query.id}.js`, async function (err, content) {
+            if (err) {
+                console.log("err", err);
+            } else {
+                let contentS = content.toString().replaceAll('lockerCadastroManagementBot', `locker${req.query.id}`)
+                // console.log('contentS: ', contentS)
+                await fs.writeFileSync(`${__dirname}/botSessions/bot${req.query.id}.js`, contentS)
+            }
+        });
     });
 
     fs.copyFile(`./templates/MeuLockerSessions.js`, `./botSessions/wppConnectSessions/${req.query.id}Sessions.js`, (err) => {
@@ -202,8 +271,15 @@ app.get('/copyFiles', async function (req, res) {
             console.log("erro: " + err)
             throw err
         }
-    
         console.log("created");
+        fs.readFile(`${__dirname}/botSessions/bots/locker${req.query.id}.js`, async function (err, content) {
+            if (err) {
+                console.log("err", err);
+            } else {
+                let contentS = content.toString().replaceAll('mainDialogMeuLocker', `mainDialog${req.query.id}`)
+                await fs.writeFileSync(`${__dirname}/botSessions/bots/locker${req.query.id}.js`, contentS)
+            }
+        });
     });
 
     fs.copyFile(`./templates/mainDialogMeuLocker.js`, `./botSessions/dialogs/mainDialog${req.query.id}.js`, (err) => {
@@ -213,6 +289,22 @@ app.get('/copyFiles', async function (req, res) {
         }
     
         console.log("created");
+    });
+
+    fs.copyFile(`./templates/ENV.config.js`, `./botSessions/envs/ENV${req.query.id}.config.js`, (err) => {
+        if (err) {
+            console.log("erro: " + err)
+            throw err
+        }
+        console.log("created ENV");
+        fs.readFile(`${__dirname}/botSessions/envs/ENV${req.query.id}.config.js`, async function (err, content) {
+            if (err) {
+                console.log("err", err);
+            } else {
+                let contentS = content.toString().replaceAll('"PORT": ,', `"PORT": "${req.body.PORT}",`).replaceAll('"SENDERPORT": ,', `"SENDERPORT": "${req.body.APIPORT}",`).replaceAll('"APINAME" : ,', `"APINAME" : "${req.body.APINAME}",`).replaceAll('fileName', `${req.body.sessionkey}`)
+                await fs.writeFileSync(`${__dirname}/botSessions/envs/ENV${req.query.id}.config.js`, contentS)
+            }
+        });
     });
 
     res.json(
@@ -226,11 +318,78 @@ app.get('/copyFiles', async function (req, res) {
 
 })
 
-
 app.get('/deleteFiles', async function (req, res) {
 
     try {
-        fs.unlinkSync(`./botSessions/bot${req.query.id}.js`);
+        fs.renameSync(`./botSessions/bot${req.query.id}.js`, `./botSessions/bot${req.query.id}MarkedForDelete.js`);
+        // console.log("Marked File successfully.");
+        
+    } catch (error) {
+        console.log(error);
+    }   
+
+    try {
+        fs.renameSync(`./botSessions/wppConnectSessions/${req.query.id}Sessions.js`, `./botSessions/wppConnectSessions/${req.query.id}SessionsMarkedForDelete.js`);
+        // console.log("Marked File successfully.");
+                
+    } catch (error) {
+        console.log(error);
+    }   
+
+
+    try {
+        fs.renameSync(`./botSessions/bots/locker${req.query.id}.js`, `./botSessions/bots/locker${req.query.id}MarkedForDelete.js`);
+        // console.log("Marked File successfully.");
+                
+    } catch (error) {
+        console.log(error);
+    }   
+
+
+    try {
+        fs.renameSync(`./botSessions/dialogs/mainDialog${req.query.id}.js`, `./botSessions/dialogs/mainDialog${req.query.id}MarkedForDelete.js`);
+        // console.log("Marked File successfully.");
+                
+    } catch (error) {
+        console.log(error);
+    }   
+
+
+    try {
+        fs.renameSync(`./botSessions/envs/ENV${req.query.id}.config.js`, `./botSessions/envs/ENV${req.query.id}MarkedForDelete.config.js`);
+        // console.log("Marked ENVFile successfully.");
+                
+    } catch (error) {
+        console.log(error);
+    } 
+
+
+    // try {
+    //     fs.renameSync(`./qrCodes/${req.query.id}.png`, `./qrCodes/${req.query.id}MarkedForDelete.png`);
+    //     console.log("Marked QRCode File successfully.");
+            
+    // } catch (error) {
+    //     // console.log(error);
+    // }   
+
+    res.json(
+        {
+            result: "ok",
+            error: null
+        }
+    )
+
+    res.end()
+
+    fetch(`http://localhost:3978/deleteFilesFinal?id=${req.query.id}`)
+
+})
+
+app.get('/deleteFilesFinal', async function (req, res) {
+
+    try {
+        // fs.unlinkSync(`./botSessions/bot${req.query.id}MarkedForDelete.js`);
+        fs.unlink(`./botSessions/bot${req.query.id}MarkedForDelete.js`, () => {});
         console.log("Deleted File successfully.");
         
     } catch (error) {
@@ -238,7 +397,8 @@ app.get('/deleteFiles', async function (req, res) {
     }   
 
     try {
-        fs.unlinkSync(`./botSessions/wppConnectSessions/${req.query.id}Sessions.js`);
+        // fs.unlinkSync(`./botSessions/wppConnectSessions/${req.query.id}SessionsMarkedForDelete.js`);
+        fs.unlink(`./botSessions/wppConnectSessions/${req.query.id}SessionsMarkedForDelete.js`, () => {});
         console.log("Deleted File successfully.");
                 
     } catch (error) {
@@ -247,7 +407,8 @@ app.get('/deleteFiles', async function (req, res) {
 
 
     try {
-        fs.unlinkSync(`./botSessions/bots/locker${req.query.id}.js`);
+        // fs.unlinkSync(`./botSessions/bots/locker${req.query.id}MarkedForDelete.js`);
+        fs.unlink(`./botSessions/bots/locker${req.query.id}MarkedForDelete.js`, () => {});
         console.log("Deleted File successfully.");
                 
     } catch (error) {
@@ -256,7 +417,8 @@ app.get('/deleteFiles', async function (req, res) {
 
 
     try {
-        fs.unlinkSync(`./botSessions/dialogs/mainDialog${req.query.id}.js`);
+        // fs.unlinkSync(`./botSessions/dialogs/mainDialog${req.query.id}MarkedForDelete.js`);
+        fs.unlink(`./botSessions/dialogs/mainDialog${req.query.id}MarkedForDelete.js`, () => {});
         console.log("Deleted File successfully.");
                 
     } catch (error) {
@@ -265,12 +427,37 @@ app.get('/deleteFiles', async function (req, res) {
 
 
     try {
-        fs.unlinkSync(`./qrCodes/${req.query.id}.png`);
-        console.log("Deleted File successfully.");
+
+        shell.exec(`npx pm2 stop ./botSessions/envs/ENV${req.query.id}MarkedForDelete.config.js`)
+        shell.exec(`npx pm2 delete ./botSessions/envs/ENV${req.query.id}MarkedForDelete.config.js`)
+
+        // fs.unlinkSync(`./botSessions/envs/ENV${req.query.id}MarkedForDelete.config.js`);
+        fs.unlink(`./botSessions/envs/ENV${req.query.id}MarkedForDelete.config.js`, () => {});
+        console.log("Deleted ENVFile successfully.");
+                
+    } catch (error) {
+        console.log(error);
+    } 
+
+
+    try {
+        // fs.unlinkSync(`./qrCodes/${req.query.id}MarkedForDelete.png`);
+        fs.unlink(`./qrCodes/${req.query.id}.png`, () => {});
+        console.log("Deleted QRCode File successfully. ");
             
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }   
+
+    try {
+        // fs.unlinkSync(`./qrCodes/${req.query.id}MarkedForDelete.png`);
+        fs.unlink(`./botSessions/status/${req.query.id}.txt`, () => {});
+        console.log("Deleted status File successfully. *******************************");
+            
+    } catch (error) {
+        // console.log(error);
+    }   
+
 
 
     res.json(
@@ -310,7 +497,11 @@ app.post('/changeFile', async function (req, res) {
             break;
 
         case 'dialogFile':
-            final = `mainDialog/${fileName}`
+            final = `dialogs/MainDialog${fileName}`
+            break;
+
+        case 'envFile':
+            final = `envs/ENV${fileName}.config`
             break;
 
         default: 
@@ -358,7 +549,11 @@ app.get('/getFile', async function (req, res) {
             break;
 
         case 'dialogFile':
-            final = `mainDialog/${fileName}`
+            final = `dialogs/MainDialog${fileName}`
+            break;
+
+        case 'envFile':
+            final = `envs/ENV${fileName}.config`
             break;
 
         default: 
@@ -383,3 +578,36 @@ app.get('/getFile', async function (req, res) {
     });
 
 })
+
+app.get('/connectedToAPI', async function (req, res) {
+
+    pm2.list(async (err, list) => {
+        for(const session of list){
+            if(session.pm2_env.status == 'stopped' || session.pm2_env.status == 'errored'){
+                // console.log("errorCloseled")
+                let final = session.name.replaceAll('Sessions', '').replaceAll('bot', '')
+                // console.log('final: ', final)
+                await fs.writeFileSync( `./botSessions/status/${final}.txt`, `browserCloseled`)   
+            } else {
+                // console.log("not")
+            }
+        }
+    })
+
+    // console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
+
+    res.json(
+        {
+            result: "ok",
+            error: null
+        }
+    )
+
+    res.end()
+})
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+  }

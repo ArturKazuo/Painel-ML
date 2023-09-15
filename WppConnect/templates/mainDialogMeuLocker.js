@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// const { TimexProperty } = require('@microsoft/recognizers-text-data-types-timex-expression');
 const { MessageFactory, InputHints } = require('botbuilder');
 const { ComponentDialog, DialogSet, DialogTurnStatus, TextPrompt, WaterfallDialog } = require('botbuilder-dialogs');
-// const moment = require('moment-timezone');
 const fetch = require('node-fetch');
 const { sendCallback, checkSim, checkNao, checkPare } = require('../functions/whatsAppSender')
 // const { CancelAndHelpDialog } = require('./cancelAndHelpDialog');
@@ -21,25 +19,17 @@ class MainDialog extends ComponentDialog {
     constructor(conversationState, userState) {
         super('MainDialog');
 
-        // if (!mainDialog) throw new Error('[MainDialog]: Missing parameter \'mainDialog\' is required'); 
-
         // Define the main dialog and its related components.
         this.addDialog(new TextPrompt('TextPrompt'))
             // .addDialog(mainDialog)
             .addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG, [
-                this.stepCelular.bind(this),
-                
-                // this.enderecoAsk.bind(this),
-                // this.confirmationReceive.bind(this),
-                // this.agradecimento.bind(this)
+                this.stepFirst.bind(this),
+                this.stepSecond.bind(this),                
             ]))
 
         this.initialDialogId = MAIN_WATERFALL_DIALOG;
 
         this.responses = {};
-
-
-        // this.timeoutRequest;
 
     }
 
@@ -66,11 +56,6 @@ class MainDialog extends ComponentDialog {
             const dialogContext = await dialogSet.createContext(turnContext);
             const results = await dialogContext.continueDialog();
 
-            //console.log("RRRRRR:", JSON.stringify(conversationData))
-
-            // if(turnContext._activity?.channelData?.data?.timeoutRequest){
-            //     this.timeoutRequest = true
-            // }
             if (results?.status === DialogTurnStatus.empty) {
                 await dialogContext.beginDialog(this.id);
             }
@@ -79,29 +64,26 @@ class MainDialog extends ComponentDialog {
 
     }
 
-    /**
-     * First step in the waterfall dialog. Prompts the user for a command.
-     * Currently, this expects a booking request, like "book me a flight from Paris to Berlin on march 22"
-     * Note that the sample LUIS model will only recognize Paris, Berlin, New York and London as airport cities.
-     */
-
-
-    async stepCelular(stepContext) {
+    async stepFirst(stepContext) {
 
         const mainDetails = stepContext.options;
 
         stepContext.context.sendActivity('Olá! Sou o Bot de WhatsApp do Painel Meu Locker. ')
 
-        return await stepContext.next(mainDetails.stepCelular);
+        return await stepContext.next();
+    }
+
+    async stepSecond(stepContext) {
+
+        const mainDetails = stepContext.options;
+
+        stepContext.context.sendActivity('No momento, só posso enviar estas mensagens. Caso desejar modificar minhas mensagens, edite o arquivo de diálogo na página principal do painel.')
+        
+        return await stepContext.next();
     }
 
     async finalStep(stepContext){
         console.log("foi")
-        // this.conversationData.finished = true;
-        // this.conversationData.responses = {}
-        // this.conversationData.locker = undefined
-        // this.conversationData.lockerID = null
-        // this.conversationData.start = null;
         return await stepContext.endDialog()
     }
 

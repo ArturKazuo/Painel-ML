@@ -1,0 +1,22 @@
+{
+    "apps" : [
+        {
+          "name": "botnewFileSys",
+          "script": "npx pm2 start ./botSessions/botnewFileSys.js",
+          "env": {
+            "PORT": "3104",
+            "SENDERPORT": "61615",
+            "APINAME" : "newFileSys"
+          }
+        },
+        {
+          "name": "newFileSysSessions",
+          "script": "npx pm2 start ./botSessions/newFileSysSessions/newFileSysSessions.js",
+          "env": {
+            "PORT": "3104",
+            "SENDERPORT": "61615",
+            "APINAME" : "newFileSys"
+          }
+        }
+    ]
+  }

@@ -9,8 +9,9 @@ import Script from 'next/script'
 import { Space_Grotesk } from 'next/font/google'
 import alo from '../../imgs/alo.png'
 import wpp from '../../imgs/wpp.png'
-import error from '../../imgs/errorFF.jpg'
-import loading from '../../imgs/giphy.gif'
+import error from '../../imgs/errorFF.png'
+import loadingGreen from '../../imgs/Spinner310Green4.svg'
+import loading from '../../imgs/Spinner470Black.svg'
 import logoML from '../../imgs/logo-meulocker.svg'
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from 'react'
@@ -44,20 +45,6 @@ export async function generateStaticParams (e) {
 
     console.log(e)
 
-    // const image = await import(`../../../../WppConnect/qrCodes/${e}.png`)
-
-    // try {
-    //     await fetch(`http://localhost:3979/generateQRCode?id=${e}`, {
-    //         method: "POST",
-    //         headers: {
-    //             'Content-Type': "application/json"
-    //         },
-    //     }).then(async (response) => {
-    //         console.log(await response.json())
-    //     });
-    // } catch (error) {
-    //     console.log("error: ", error)
-    // }
   
     return [{ id: e },  { image: image }]
 }
@@ -66,23 +53,93 @@ export default function mainPage(params) {
 
     const { push } = useRouter();
 
+    // let flagConnect = false
+
+    const checkUser = async () => {
+      const users = (await getDocs(collection(db, 'painelUsers'))).docs.map(doc => doc.data())
+      const userActual = window.sessionStorage.getItem('user')
+
+      console.log(users)
+
+      let flagAdmin = false
+      let flagUser = false
+      
+      users.forEach(async (user) => {
+          // console.log(user)
+          console.log(user.email)
+          if(user.email === userActual){
+              if(user.papel == 'admin'){
+                flagAdmin = true
+              }
+              flagUser = true
+          } 
+
+      })
+
+      if(!flagUser){
+          push('/pages/loginPage')
+      }
+      if(flagAdmin){
+        document.getElementById('addButtonDiv').innerHTML = `
+            <a href="/pages/addSession" prefetch={true} class="addButton" id="addButtonDiv"><p class=${sg.className} >Criar sessão</p></a>
+            <a href="/pages/cadastroPage" prefetch={true} class="addButton" id="addButtonDivAccount"><p class=${sg.className} >Adicionar Usuário</p></a>
+            <a href="/pages/removeAccountPage" prefetch={true} class="addButton" id="addButtonDivAccount"><p class=${sg.className} >Procurar Usuário</p></a>
+        `
+      }
+    }   
+
+    const pulseCheckImg = async (id) => {
+      try {
+        // console.log('alou')
+        if(document.getElementById(`checkBox${id}`).checked){
+          console.log(true)
+        } else {
+          console.log('alou')
+          document.getElementById(`botCardImg${id}`).childNodes[0].src = `http://localhost:3978/getImage?image=${id}&date=${Date.now()}`
+          try {
+            await fetch(`http://localhost:3978/connectedToAPI?id=${id}`)
+          } catch (error) {
+            console.log("error: ", error)
+          }
+        }
+
+      } catch (error) {
+          console.log("error: ", error)
+      }
+      await setTimeout(async () => {
+        // console.log('alou2')
+        if(document.getElementById(`checkBox${id}`)?.checked != undefined){
+          // console.log("id: ", id)
+          await pulseCheckImg(id);
+        }
+      }, 2000);
+    }
+
     const conectar = async (e) => {
+
         console.log(e)
-        console.log(loading)
-        document.getElementById(`botCardImg${e.target.id}`).innerHTML = `<img src="${loading.src}" width={500} height={500} alt="Picture of the author"/> `
+        // flagConnect = true;
+        document.getElementById(`checkBox${e.target.id}`).checked = true
+
+        // loadPage()
+        
+        // console.log(loading)
+        document.getElementById(`botCardImg${e.target.id}`).innerHTML = `<Image src="${loading.src}" width={500} height={500} alt="Picture of the author"/> `
 
         // generateStaticParams(e.target.id)
 
         let time4 = setTimeout(async () => {
           document.getElementById(`botCardImg${e.target.id}`).innerHTML = `<Image src="http://localhost:3978/getImage?image=${e.target.id}" width={500} height={500} alt="Picture of the author" /> `
+          // flagConnect = false
+          document.getElementById(`checkBox${e.target.id}`).checked = false
+          pulseCheckImg(e.target.id)
         }, 30000);
 
         try {
-            await fetch(`http://localhost:3978/startSessions?id=${e.target.id}`)
+            await fetch(`http://localhost:3978/startSessions?id=${e.target.id}&name=${window.sessionStorage.getItem('user')}`)
         } catch (error) {
             console.log("error: ", error)
         }
-
 
     }
   
@@ -111,6 +168,7 @@ export default function mainPage(params) {
 
             await fetch(`http://localhost:3978/deleteFiles?id=${e.target.id}`).then(async () => {
               await myFunc();
+              // push('/pages/mainPage')
               stopLoadPage()
             })
 
@@ -137,6 +195,7 @@ export default function mainPage(params) {
       await fetch(`http://localhost:3978/getFile?file=${e.target.classList[2]}&type=${e.target.id.replace(`${e.target.classList[2]}`, '')}`).then( async (codeSS) => {  
             let code = await codeSS.json()
             // console.log("code: ", code)
+            // flagConnect = true;
             // push(`/pages/components/consoleMonaco?name=${e.target.classList[2]}&type=${e.target.id.replace(`${e.target.classList[2]}`, '')}`)
             push(`/pages/components/consoleMonaco?file=${encodeURI(code)}&name=${e.target.classList[2]}&type=${e.target.id.replace(`${e.target.classList[2]}`, '')}`)
 
@@ -179,11 +238,12 @@ export default function mainPage(params) {
     }
     
     const loadPage = async () => {
-        document.getElementById('mainID').innerHTML = document.getElementById('mainID').innerHTML + `<div class=mainLoad ><img src="${loading.src}" /></div>`
+        // console.log(loading)
+        document.getElementById('mainID').innerHTML = document.getElementById('mainID').innerHTML + `<div class=mainLoad ><Image src="${loadingGreen.src}" width={500} height={500} alt="Picture of the author"/></div>`
     }
 
     const stopLoadPage = async () => {
-      document.querySelector('.mainLoad').classList.add('noDisplay')
+      document.querySelector('.mainLoad').remove()
     }
 
     const myFunc = async () => {
@@ -192,6 +252,7 @@ export default function mainPage(params) {
         await push('/pages/loginPage')
       } 
 
+      checkUser()
       
       document.getElementById(`addButtonDiv`).addEventListener("click", loadPage, false);
 
@@ -200,7 +261,13 @@ export default function mainPage(params) {
       console.log(sessions)
   
       let text = ``;
-  
+
+      loadPage();
+
+      // flagConnect = false;
+
+      await fetch(`http://localhost:3978/connectedToAPI?id=${window.sessionStorage.getItem('user')}`)
+
       sessions.forEach(session => {
   
         if(count == 1 || count % 3 == 1){
@@ -214,13 +281,14 @@ export default function mainPage(params) {
           <div class='botCardDiv'  id="botCardDivsvg${session.sessionkey}"> 
             <div class='botCard front'>
               <div class='botCardImg' id=botCardImg${session.sessionkey}>
-                <img src="${wpp.src}" width={500} height={500} alt="Picture of the author"/> 
+                <img src="http://localhost:3978/getImage?image=${session.sessionkey}" width={500} height={500} alt="error"/> 
               </div>
               <button  class=marginButtonBotCard ><p class='${sg.className}'>Nome: ${session.session}</p></button>
               <button  class=marginButtonBotCard ><p class='${sg.className}'>Chave: ${session.sessionkey}</p></button>
               <button id=conectarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton' id=${session.sessionkey}>Conectar</p></button>
               <button id=desconectarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton desconectarButton' id=${session.sessionkey}>Desconectar</p></button>
               <button id=deletarSession${session.sessionkey} class=marginButtonBotCard ><p class='${sg.className} addButton deleteButton' id=${session.sessionkey}>Excluir</p></button>
+              <input style="display:none;" type="checkbox" id="checkBox${session.sessionkey}" value="flagConnect" >
             </div>
             <div class='botCard back' id="botCardBack${session.sessionkey}"> 
 
@@ -231,6 +299,8 @@ export default function mainPage(params) {
               <button id=botFile${session.sessionkey} class="marginButtonBotCard fullSize " ><p class='${sg.className} addButton ${session.sessionkey}' id=botFile${session.sessionkey}>Editar arquivo de Bot</p></button>
 
               <button id=dialogFile${session.sessionkey} class="marginButtonBotCard fullSize " ><p class='${sg.className} addButton ${session.sessionkey}' id=dialogFile${session.sessionkey}>Editar arquivo de dialogo</p></button>
+
+              <button id=envFile${session.sessionkey} class="marginButtonBotCard fullSize " ><p class='${sg.className} addButton ${session.sessionkey}' id=envFile${session.sessionkey}>Editar arquivo de Portas (ENV)</p></button>
 
               <button style="color: #eeeeee !important;" class="addButton removeMargin" id="addFile${session.sessionkey}" >Enviar</button>
               
@@ -258,6 +328,8 @@ export default function mainPage(params) {
   
       });
 
+      stopLoadPage()
+
       count = 1
   
       document.getElementById('botCards').innerHTML = text
@@ -274,7 +346,9 @@ export default function mainPage(params) {
         document.getElementById(`sessionFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
         document.getElementById(`botFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
         document.getElementById(`dialogFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
+        document.getElementById(`envFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
         document.getElementById(`addFile${session.sessionkey}`).addEventListener("click", sendFile, false);
+        pulseCheckImg(session.sessionkey)
       })
     }
   
@@ -308,7 +382,7 @@ export default function mainPage(params) {
   
           <div className={""}>
   
-            <div className={"addButtonDiv"} > 
+            <div className={"addButtonDiv"} id={"addButtonDiv"}> 
               <Link href="/pages/addSession" prefetch={true} className={"addButton"} id={"addButtonDiv"}><p className={sg.className}>Criar sessão</p></Link>
             </div>
   

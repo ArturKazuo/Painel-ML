@@ -136,6 +136,9 @@ main {
 .botCard img {
   width: 80%;
   margin: 20px 20px 20px 20px;
+  /* background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url('./imgs/giphy.gif'); */
 }
 
 .botCardImg {
@@ -163,6 +166,10 @@ main {
   transition: all ease-in-out 0.5s;
   border: #5ebb50 solid 2px;
   box-shadow: 0 0 0 0 #5ebb50 inset;
+}
+
+.addButtonDiv .addButton {
+  margin: 20px 20px 20px 20px !important;
 }
 
 .addButton:hover {
@@ -232,8 +239,8 @@ main {
 .mainLoad {
   width: 100%;
   height: 100%;
-  background-color: #333333;
-  opacity: 0.5;
+  background-color: rgba(51, 51, 51, 0.7);
+  /* opacity: 0.5; */
   position: absolute;
   top: 0px;
   z-index: 99;
@@ -288,7 +295,7 @@ main {
 }
 
 .front {
-
+  width: 100%;
 }
 
 .back {
@@ -382,3 +389,86 @@ svg.svgFlipped:hover {
 .fullSize {
   width: 100% !important;
 }
+
+.select {
+  width: 100%;
+}
+
+.outsideSearchDiv {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.insideSearchDiv {
+  width: 100%;
+  margin: 0px 10px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.divTASearch {
+  margin: 0px 0px 0px 0px !important;
+}
+
+#magGlass, .userCardButtons svg{
+  fill: #eeeeee;
+  margin: 0px 6px 0px 0px ;
+}
+
+#searchButtonButton p, .userCardButtons p {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.userCard {
+  padding: 20px 20px 20px 20px;
+  border: #5ebb50 solid 2px;
+  border-radius: 5px;
+}
+
+.userCardButtons {
+  margin: 10px 0px 0px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.userCardButtons button {
+  margin: 0px 5px 0px 5px !important;
+}
+
+.ajudaMainDiv {
+  height:60vh;
+  /* overflow: hidden; */
+}
+
+.ajudaDiv {
+  width: 70% !important;
+  height: 100% !important;
+  /* max-height: 100vh !important; */
+  overflow-y: scroll;
+  justify-content: flex-start !important;
+}
+
+.maxHeight {
+  height: 100%;
+}
+
+.ajudaInsideDiv {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0px 0px 50px 0px;
+}
+
+.ajudaDiv h4 {
+  margin: 20px 0px 20px 0px !important;
+}
+

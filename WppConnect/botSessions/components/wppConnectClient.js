@@ -44,6 +44,17 @@ module.exports = class Bot {
           console.log('Status Session: ', statusSession); //return isLogged || notLogged || browserClose || qrReadSuccess || qrReadFail || autocloseCalled || desconnectedMobile || deleteToken
           //Create session wss return "serverClose" case server for close
           console.log('Session name: ', session);
+
+          require('fs').writeFile(
+            `./botSessions/status/${session}.txt`,
+            statusSession,
+            function (err) {
+                if (err != null) {
+                    console.log(err);
+                }
+            }
+          );
+
         },
         onLoadingScreen: (percent, message) => {
           console.log('LOADING_SCREEN', percent, message);
