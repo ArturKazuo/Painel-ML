@@ -1,6 +1,8 @@
 const wppconnect = require('@wppconnect-team/wppconnect');
 const qrcode = require('qrcode-terminal');
 const QR = require('qrcode');
+const { io } = require("socket.io-client");
+
 
 module.exports = class Bot {
 
@@ -27,16 +29,20 @@ module.exports = class Bot {
             response.data = new Buffer.from(matches[2], 'base64');
 
             var imageBuffer = response;
-            require('fs').writeFile(
-                `../../qrCodes/${context.id}.png`,
-                imageBuffer['data'],
-                'binary',
-                function (err) {
-                    if (err != null) {
-                        console.log(err);
-                    }
-                }
-            );
+
+            const socket = io("http://localhost:3978");
+            socket.emit('qrCode to read', imageBuffer);
+
+            // require('fs').writeFile(
+            //     `../../qrCodes/${context.id}.png`,
+            //     imageBuffer['data'],
+            //     'binary',
+            //     function (err) {
+            //         if (err != null) {
+            //             console.log(err);
+            //         }
+            //     }
+            // );
 
 
         },
@@ -44,6 +50,8 @@ module.exports = class Bot {
           console.log('Status Session: ', statusSession); //return isLogged || notLogged || browserClose || qrReadSuccess || qrReadFail || autocloseCalled || desconnectedMobile || deleteToken
           //Create session wss return "serverClose" case server for close
           console.log('Session name: ', session);
+          const socket = io("http://localhost:3978");
+          socket.emit('status change', imageBuffer);
         },
         onLoadingScreen: (percent, message) => {
           console.log('LOADING_SCREEN', percent, message);

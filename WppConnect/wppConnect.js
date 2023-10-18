@@ -9,7 +9,9 @@ const { firebaseConfig } = require('./firebase.config.js')
 const { initializeApp } = require('firebase/app')
 const { getFirestore, collection, getDocs, doc, addDoc, setDoc, deleteDoc } = require('firebase/firestore/lite');
 const pm2 = require('pm2')
-// const client = require('firebase-tools')
+const { Server } = require("socket.io");
+const socket = require("socket.io");
+const { createServer } = require('http');
 
 // async function generateQRCode(context, qrcode) {
 
@@ -91,11 +93,10 @@ const pm2 = require('pm2')
 const appDB = initializeApp(firebaseConfig);
 const db = getFirestore(appDB);
 
-var app = express();
-
 // app.use(bodyParser.json(), cors({
 //     origin: 'http://localhost:3000'
 // }))
+var app = express();
 app.use(bodyParser.json())
 app.use(
     bodyParser.urlencoded({
@@ -105,10 +106,46 @@ app.use(
 app.use(cors({origin: 'http://localhost:3000'}))
 
 
-app.listen(process.env.port || process.env.PORT || 3978, async () => {
+const server = app.listen(process.env.port || process.env.PORT || 3978, async () => {
     console.log(`\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator`);
     console.log(`\nTo talk to your bot, open the emulator select "Open Bot" on 3978`);
+});
 
+
+const io = socket(server, {
+    cors: {
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["authqr"],
+      credentials: true
+    }
+});
+
+io.on('connection', (socket) => {
+    // console.log("conectou pelo amor")
+    socket.on('qrCodeToRead', (imageBuffer, urlCode, sessionName) => {
+        console.log("foi qrcode to read")
+        // console.log('message: ' + imageBuffer['data']);
+        // console.log('message 2: ', urlCode);
+
+        io.emit('qrCodeToReadNextJS', imageBuffer, urlCode, sessionName);
+    });
+
+    socket.on('qrCodeAutoClose', (sessionName) => {
+        console.log("foi qrcode auto close")
+        // console.log('message: ' + imageBuffer['data']);
+        // console.log('message 2: ', urlCode);
+
+        io.emit('qrCodeAutoCloseNextJS', sessionName);
+    });
+
+    socket.on('statusChange', (sessionName, status) => {
+        console.log("foi status change " + status)
+        // console.log('message: ' + imageBuffer['data']);
+        // console.log('message 2: ', urlCode);
+
+        io.emit('statusChangeNextJS', sessionName, status);
+    });
 });
 
 
@@ -200,10 +237,16 @@ app.get('/getImage', async function (req, res) {
 
     fs.readFile(`${__dirname}/qrCodes/` + pic + ".png", async function (err, content) {
         if (err) {
-            res.writeHead(400, {'Content-type':'image/png'})
-            // console.log("err Triangle");
-            let errorImage = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
-            res.end(errorImage);    
+            if(req.query.statusChange){
+                res.writeHead(200, {'Content-type':'image/svg'})
+                res.end(fs.readFileSync(`${__dirname}/imgs/Spinner470Black.svg`)); 
+            } else {
+                res.writeHead(400, {'Content-type':'image/png'})
+                console.log("err Triangle");
+                let errorImage = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
+                res.end(errorImage); 
+            }   
+
         } else {
             //specify the content type in the response will be an image
             // console.log('not weeoe')
@@ -221,12 +264,15 @@ app.get('/getImage', async function (req, res) {
                         finalImg = fs.readFileSync(`${__dirname}/qrCodes/${pic}.png`)
                     } else if(content == 'browserCloseled' || content == 'autocloseCalled' ||  content == 'serverClose' ||  content == 'deleteToken' ||  content == 'qrReadFail'){
                         finalImg = fs.readFileSync(`${__dirname}/imgs/errorFF.png`)
-                    } else if(content == 'isLogged' || content == 'inChat'){
+                    } else if(content == 'isLogged' || content == 'inChat' || content == 'qrReadSuccess'){
                         finalImg = fs.readFileSync(`${__dirname}/imgs/greenCheck.png`)
                     } else if(content == 'qrReadError'){
                         finalImg = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
+                    } else if(content == 'loading') {
+                        finalImg = fs.readFileSync(`${__dirname}/imgs/Spinner470Black.svg`)
                     } else {
                         // console.log('naaaada nada nada')
+
                         finalImg = fs.readFileSync(`${__dirname}/imgs/errorTriangle.png`)
                     }
                     
@@ -306,6 +352,18 @@ app.post('/copyFiles', async function (req, res) {
             }
         });
     });
+
+    fs.writeFile(
+        `./botSessions/status/${req.query.id}.txt`,
+        'loading',
+        function (err) {
+            if (err != null) {
+                console.log("err status: ", err);
+            } else {
+                console.log("created!!!!")
+            }
+        }
+      );
 
     res.json(
         {

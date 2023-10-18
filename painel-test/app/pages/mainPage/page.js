@@ -31,6 +31,8 @@ import {
   faMagnifyingGlass,
   faCircleStop
 } from "@fortawesome/free-solid-svg-icons";
+import { Server } from "socket.io";
+const { io } = require("socket.io-client");
 
   
 const app = initializeApp(firebaseConfig);
@@ -50,6 +52,42 @@ export async function generateStaticParams (e) {
 }
 
 export default function mainPage(params) {
+      
+    const socket = io("http://localhost:3978", {
+      withCredentials: true,
+      extraHeaders: {
+        "authqr": "true"
+      }
+    });
+    socket.on('qrCodeToReadNextJS', (imageBuffer, urlCode, sessionName) => {
+      console.log("\n\nfoi foi qrcode to read:\n\n " + sessionName)
+      // console.log('message: ' + imageBuffer['data']);
+      // console.log('message 2: ', urlCode);
+      let id = sessionName
+      if (typeof document !== "undefined") {
+        document.getElementById(`botCardImg${id}`).childNodes[0].src = `http://localhost:3978/getImage?image=${id}&date=${Date.now()}`
+      }
+    });
+    socket.on('qrCodeAutoCloseNextJS', (sessionName) => {
+      console.log("\n\nfoi foi qrcode auto close:\n\n " + sessionName)
+      // console.log('message: ' + imageBuffer['data']);
+      // console.log('message 2: ', urlCode);
+      let id = sessionName
+      if (typeof document !== "undefined") {
+        document.getElementById(`botCardImg${id}`).childNodes[0].src = `http://localhost:3978/getImage?image=${id}&date=${Date.now()}`
+      }
+    });
+    socket.on('statusChangeNextJS', (sessionName, status) => {
+      console.log("\n\nfoi status change:\n\n " + status)
+      // console.log('message: ' + imageBuffer['data']);
+      // console.log('message 2: ', urlCode);
+      let id = sessionName
+
+      if (typeof document !== "undefined") {
+        document.getElementById(`botCardImg${id}`).childNodes[0].src = `http://localhost:3978/getImage?image=${id}&date=${Date.now()}&statusChange=true`
+      }
+    });
+
 
     const { push } = useRouter();
 
@@ -88,33 +126,6 @@ export default function mainPage(params) {
       }
     }   
 
-    const pulseCheckImg = async (id) => {
-      try {
-        // console.log('alou')
-        if(document.getElementById(`checkBox${id}`).checked){
-          console.log(true)
-        } else {
-          console.log('alou')
-          document.getElementById(`botCardImg${id}`).childNodes[0].src = `http://localhost:3978/getImage?image=${id}&date=${Date.now()}`
-          try {
-            await fetch(`http://localhost:3978/connectedToAPI?id=${id}`)
-          } catch (error) {
-            console.log("error: ", error)
-          }
-        }
-
-      } catch (error) {
-          console.log("error: ", error)
-      }
-      await setTimeout(async () => {
-        // console.log('alou2')
-        if(document.getElementById(`checkBox${id}`)?.checked != undefined){
-          // console.log("id: ", id)
-          await pulseCheckImg(id);
-        }
-      }, 2000);
-    }
-
     const conectar = async (e) => {
 
         console.log(e)
@@ -129,10 +140,11 @@ export default function mainPage(params) {
         // generateStaticParams(e.target.id)
 
         let time4 = setTimeout(async () => {
-          document.getElementById(`botCardImg${e.target.id}`).innerHTML = `<Image src="http://localhost:3978/getImage?image=${e.target.id}" width={500} height={500} alt="Picture of the author" /> `
+          // document.getElementById(`botCardImg${e.target.id}`).innerHTML = `<Image src="http://localhost:3978/getImage?image=${e.target.id}" width={500} height={500} alt="Picture of the author" /> `
           // flagConnect = false
           document.getElementById(`checkBox${e.target.id}`).checked = false
-          pulseCheckImg(e.target.id)
+          // myFuncUse(e.target.id)
+          // pulseCheckImg(e.target.id)
         }, 30000);
 
         try {
@@ -253,6 +265,8 @@ export default function mainPage(params) {
       } 
 
       checkUser()
+
+      
       
       document.getElementById(`addButtonDiv`).addEventListener("click", loadPage, false);
 
@@ -348,7 +362,7 @@ export default function mainPage(params) {
         document.getElementById(`dialogFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
         document.getElementById(`envFile${session.sessionkey}`).addEventListener("click", toggleFileInput, false);
         document.getElementById(`addFile${session.sessionkey}`).addEventListener("click", sendFile, false);
-        pulseCheckImg(session.sessionkey)
+        // pulseCheckImg(session.sessionkey)
       })
     }
   

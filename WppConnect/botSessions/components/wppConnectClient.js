@@ -1,6 +1,8 @@
 const wppconnect = require('@wppconnect-team/wppconnect');
 const qrcode = require('qrcode-terminal');
 const QR = require('qrcode');
+const { io } = require("socket.io-client");
+
 
 module.exports = class Bot {
 
@@ -9,6 +11,7 @@ module.exports = class Bot {
      * para que eu possa responder as mensagems por aqui.
      */
     constructor(SESSION_NAME, receiveMessage, context) {
+        // let sessionName = ''; 
        wppconnect.create({
         session: SESSION_NAME, //Pass the name of the client you want to start the bot
         catchQR: (base64Qrimg, asciiQR, attempts, urlCode) => {
@@ -16,6 +19,8 @@ module.exports = class Bot {
           console.log(asciiQR);
           // console.log('base64 image string qrcode: ', base64Qrimg);
           console.log('urlCode (data-ref): ', urlCode);
+
+          // sessionName = Sess
 
             var matches = base64Qrimg.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
                 response = {};
@@ -27,6 +32,11 @@ module.exports = class Bot {
             response.data = new Buffer.from(matches[2], 'base64');
 
             var imageBuffer = response;
+
+            console.log("dwaidonwa ALOU")
+
+            console.log("dwaidonwa")
+
             require('fs').writeFile(
                 `./qrCodes/${context}.png`,
                 imageBuffer['data'],
@@ -38,12 +48,22 @@ module.exports = class Bot {
                 }
             );
 
+            // const socket = io();
+            const socket = io("http://localhost:3978");
+            socket.emit('qrCodeToRead', imageBuffer, asciiQR, SESSION_NAME);
+
 
         },
         statusFind: (statusSession, session) => {
           console.log('Status Session: ', statusSession); //return isLogged || notLogged || browserClose || qrReadSuccess || qrReadFail || autocloseCalled || desconnectedMobile || deleteToken
           //Create session wss return "serverClose" case server for close
           console.log('Session name: ', session);
+
+          // const socket = io("http://localhost:3978");
+          // socket.emit('qrCodeToRead', imageBuffer, asciiQR, SESSION_NAME);
+
+          const socket = io("http://localhost:3978");
+          socket.emit('statusChange', session, statusSession);
 
           require('fs').writeFile(
             `./botSessions/status/${session}.txt`,
@@ -54,6 +74,9 @@ module.exports = class Bot {
                 }
             }
           );
+
+          // const socket = io("http://localhost:3978");
+          // socket.emit('statusChange', session, statusSession);
 
         },
         onLoadingScreen: (percent, message) => {
@@ -112,7 +135,12 @@ module.exports = class Bot {
         }
       })
       .then((client) => this.start(client, receiveMessage))
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error)
+        
+        const socket = io("http://localhost:3978");
+        socket.emit('qrCodeAutoClose', SESSION_NAME);
+      });
     }
   
     start(client, receiveMessage) {

@@ -8,6 +8,7 @@ import Head from 'next/head'
 import Script from 'next/script'
 import { Space_Grotesk } from 'next/font/google'
 import alo from '../../imgs/alo.png'
+import qrCode from '../../imgs/qrcode.png'
 import wpp from '../../imgs/wpp.png'
 import error from '../../imgs/errorFF.png'
 import loading from '../../imgs/Spinner310Green4.svg'
@@ -255,9 +256,9 @@ export default function cadastroPage(params) {
                     <div className={"ajudaInsideDiv"}>
                         <h5  className={`${sg.className} white`}><b>Sessões: </b></h5>
                         <p  className={`${sg.className} white`}><br />
-                          <Image src={wppYes.src} width={"50"} height={"50"} alt="" className={"bgImg"} />Sessão conectada <br />
-                          <Image src={error.src} width={"60"} height={"60"}  alt="" className={"bgImg"} />Sessão desconectada <br />
-                          <Image src={errorTriangle.src} width={"80"} height={"80"}  alt="" className={"bgImg"} />Sessão nunca utilizada anteriormente, ou algum erro ocorreu<br /><br />
+                          <Image src={wppYes.src} width={"50"} height={"50"} alt="" className={"bgImg"} />Sessão conectada <br /><br />
+                          <Image src={error.src} width={"60"} height={"60"}  alt="" className={"bgImg"} />Sessão desconectada <br /><br />
+                          <Image src={errorTriangle.src} width={"80"} height={"80"}  alt="" className={"bgImg"} />Sessão nunca utilizada anteriormente, ou houve algum erro<br /><br /><br />
                           - Caso tenha algum erro ao conectar o bot, clique em desconectar, espere alguns segundos e tente conectar novamente.<br />
                         </p>
                     </div>

@@ -1,0 +1,7 @@
+2023/10/17-15:56:22.636 381c Creating DB C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\newNew\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb since it was missing.
+2023/10/17-15:56:22.658 381c Reusing MANIFEST C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\newNew\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2023/10/17-15:56:22.699 6f64 Level-0 table #5: started
+2023/10/17-15:56:22.710 6f64 Level-0 table #5: 7387 bytes OK
+2023/10/17-15:56:22.720 6f64 Delete type=0 #3
+2023/10/17-15:56:22.721 6f64 Manual compaction at level-0 from '\x00\x01\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x02\x00\x00\x00' @ 0 : 0; will stop at (end)
+2023/10/17-15:56:23.071 6f64 Manual compaction at level-0 from '\x00\x06\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x07\x00\x00\x00' @ 0 : 0; will stop at (end)

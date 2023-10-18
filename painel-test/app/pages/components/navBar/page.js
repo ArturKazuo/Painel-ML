@@ -12,6 +12,7 @@ import wpp from '../../../imgs/wpp.png'
 import error from '../../../imgs/errorFF.png'
 import loading from '../../../imgs/giphy.gif'
 import logoML from '../../../imgs/logo-meulocker.svg'
+import loadingGreen from '../../../imgs/Spinner310Green4.svg'
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from 'react'
 import { firebaseConfig } from '../../../firebase.config.js'
@@ -26,12 +27,24 @@ export default function navBar(params) {
 
     const { push } = useRouter()
 
+    const loadPage = async () => {
+        console.log("\n\ndocuemtn:: \n\n", document)
+        document.getElementById('mainID').innerHTML = document.getElementById('mainID').innerHTML + `<div class=mainLoad ><Image src="${loadingGreen.src}" width={500} height={500} alt="Picture of the author"/></div>`
+    }
+
+    const stopLoadPage = async () => {
+      document.querySelector('.mainLoad').remove()
+    }
+
     const gotoHomePage = () => {
         push('/pages/mainPage')
     }
 
     const myFunc = () => {
         document.getElementById('imgML').addEventListener('click', gotoHomePage)
+        document.getElementById(`home`).addEventListener("click", loadPage, false);
+        document.getElementById(`conta`).addEventListener("click", loadPage, false);
+        document.getElementById(`ajuda`).addEventListener("click", loadPage, false);
     }
 
     useEffect(() => {
@@ -43,9 +56,9 @@ export default function navBar(params) {
             <div className={"imgMLDiv flexRow"}>
                 <Image src={logoML} alt="" id={"imgML"} />
             </div>
-            <Link href="/pages/mainPage" ><p className={sg.className, "navLink"}>Home</p><div className={"divNavInside"}></div></Link>
-            <Link href="/pages/conta" ><p className={sg.className, "navLink"}>Conta</p><div className={"divNavInside"}></div></Link>
-            <Link href="/pages/ajuda" ><p className={sg.className, "navLink"}>Ajuda</p><div className={"divNavInside"}></div></Link>
+            <Link href="/pages/mainPage" id={"home"} ><p className={sg.className, "navLink"}>Home</p><div className={"divNavInside"}></div></Link>
+            <Link href="/pages/conta" id={"conta"} ><p className={sg.className, "navLink"}>Conta</p><div className={"divNavInside"}></div></Link>
+            <Link href="/pages/ajuda" id={"ajuda"} ><p className={sg.className, "navLink"}>Ajuda</p><div className={"divNavInside"}></div></Link>
             <Link href="https://meulocker.com.br/" target={"blank"} ><p className={sg.className, "navLink"}>Conheça a empresa</p><div className={"divNavInside"}></div></Link>
         </nav>
     )

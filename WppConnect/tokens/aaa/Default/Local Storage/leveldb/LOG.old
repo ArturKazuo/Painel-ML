@@ -1,3 +1,6 @@
-2023/09/14-14:13:17.769 21b4 Reusing MANIFEST C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\aaa\Default\Local Storage\leveldb/MANIFEST-000001
-2023/09/14-14:13:17.769 21b4 Recovering log #3
-2023/09/14-14:13:17.770 21b4 Reusing old log C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\aaa\Default\Local Storage\leveldb/000003.log 
+2023/10/17-14:21:05.231 5c1c Reusing MANIFEST C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\aaa\Default\Local Storage\leveldb/MANIFEST-000001
+2023/10/17-14:21:05.231 5c1c Recovering log #7
+2023/10/17-14:21:05.232 5c1c Reusing old log C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\aaa\Default\Local Storage\leveldb/000007.log 
+2023/10/17-14:23:06.361 5734 Level-0 table #10: started
+2023/10/17-14:23:06.366 5734 Level-0 table #10: 28822 bytes OK
+2023/10/17-14:23:06.372 5734 Delete type=0 #7

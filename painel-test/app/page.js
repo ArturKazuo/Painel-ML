@@ -9,7 +9,7 @@ import { Space_Grotesk } from 'next/font/google'
 import alo from './imgs/alo.png'
 import qrcode from './imgs/qrcode.png'
 import wpp from './imgs/wpp.png'
-import error from './imgs/errorFF.jpg'
+import error from './imgs/errorFF.png'
 import loading from './imgs/giphy.gif'
 import logoML from './imgs/logo-meulocker.svg'
 import "bootstrap/dist/css/bootstrap.min.css";

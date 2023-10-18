@@ -1,0 +1,10 @@
+2023/10/17-16:00:37.005 4190 Reusing MANIFEST C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\newNew\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2023/10/17-16:00:37.006 4190 Recovering log #4
+2023/10/17-16:00:37.011 4190 Reusing old log C:\Users\rguim\Documents\Estagio\NextJs\PainelTest\WppConnect\tokens\newNew\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000004.log 
+2023/10/17-16:00:37.074 6164 Manual compaction at level-0 from '\x00\x07\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x08\x00\x00\x00' @ 0 : 0; will stop at (end)
+2023/10/17-16:00:37.078 6164 Manual compaction at level-0 from '\x00\x05\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x06\x00\x00\x00' @ 0 : 0; will stop at (end)
+2023/10/17-16:00:37.083 4190 Level-0 table #8: started
+2023/10/17-16:00:37.091 4190 Level-0 table #8: 94246 bytes OK
+2023/10/17-16:00:37.101 4190 Delete type=0 #4
+2023/10/17-16:00:37.101 4190 Manual compaction at level-0 from '\x00\x04\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x05\x00\x00\x00' @ 0 : 0; will stop at (end)
+2023/10/17-16:00:37.109 6164 Manual compaction at level-0 from '\x00\x03\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x04\x00\x00\x00' @ 0 : 0; will stop at (end)

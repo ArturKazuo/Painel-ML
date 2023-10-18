@@ -67,6 +67,7 @@ export default function consoleMonaco(params) {
                 // setTimeout(async () => {
                 //     // push('/pages/mainPage')
                 // }, 5000);
+
                 window.alert('Arquivo salvo com sucesso!')
                 // document.querySelector('.outsideDiv').innerHTML = `<div class=mainLoad ><p class="${sg.className}" >Sucesso ao salvar</p>></div>`
             })
@@ -102,14 +103,6 @@ export default function consoleMonaco(params) {
                 </div>
             </div>
         </div>
-
-        // beforeMount={async (monaco) => {
-        //     // let codeF = await myFunc()
-        //     // monaco.setValue(codeF)
-        //     console.log("aiwajdiao", monaco)
-        //     // monaco.setValue('code')
-        //     monaco.value = 'code'
-        // }}
     )
 
 }
